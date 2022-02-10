@@ -80,14 +80,20 @@ namespace ana
 
     for(unsigned int i = 0; i < global.wgts.size(); ++i){
       const caf::SRWeightPSet& pset = global.wgts[i];
-      // For now, don't try to handle any parameter sets that have shifted more
-      // than one knob at once.
-      if(pset.map.size() != 1) continue;
-
-      // Save which position in the vector this was
-      fSystIdxs[pset.map[0].param.name] = i;
-      // Save all the knob values
-      fShiftVals[pset.map[0].param.name] = pset.map[0].vals;
+      // If one knob is used, save the shifts
+      if(pset.map.size() == 1)
+      {
+        // Save which position in the vector this was
+        fSystIdxs[pset.map[0].param.name] = i;
+        // Save all the knob values
+        fShiftVals[pset.map[0].param.name] = pset.map[0].vals;
+      }
+      // If we shift multiple knobs, give up on trying to save the shifts and
+      // just save the total weight for the multisim
+      else
+      {
+        fSystIdxs[pset.name] = i;
+      }
     }
   }
 
