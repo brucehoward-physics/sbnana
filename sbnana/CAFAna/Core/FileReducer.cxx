@@ -288,5 +288,4 @@ namespace ana
     // Allow user to override any metadata
     for(auto it: fMetaMap) meta[it.first] = it.second;
   }
-
 } // namespace
