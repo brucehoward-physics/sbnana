@@ -145,7 +145,7 @@ namespace ana
   //----------------------------------------------------------------------
   Eigen::MatrixXd EnsembleRatio::CovarianceMatrix()
   {
-    assert (fMultiverse->MultiverseType() == kRandomGas);
+    assert (fMultiverse->MultiverseType() != kHypercross);
 
     const Eigen::ArrayXd& arr = fHist.GetEigen();
 
@@ -162,7 +162,7 @@ namespace ana
   //----------------------------------------------------------------------
   Eigen::MatrixXd EnsembleRatio::BiasMatrix()
   {
-    assert (fMultiverse->MultiverseType() == kRandomGas);
+    assert (fMultiverse->MultiverseType() != kHypercross);
 
     const Eigen::ArrayXd& arr = fHist.GetEigen();
 
