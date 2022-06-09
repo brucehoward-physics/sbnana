@@ -35,6 +35,12 @@ namespace ana
       return Cached(FitMultiverse::RandomGas(ConvertSysts(systs), Nuniv, seed));
     }
 
+    /// See FitMultiverse::Data
+    static const _Multiverse& Data(int Nuniv)
+    {
+      return Cached(FitMultiverse::Data(Nuniv));
+    }
+
     /// Details of a particular universe
     const _Universe<SystT>& GetUniverse(int i) const
     {

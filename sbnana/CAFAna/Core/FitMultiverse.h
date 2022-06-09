@@ -11,7 +11,7 @@ namespace ana
 {
   template<class SystT> using _Universe = std::unordered_map<const SystT*, double>;
 
-  enum EMultiverseType{kHypercross, kRandomGas};
+  enum EMultiverseType{kHypercross, kRandomGas, kData};
 
   using FitUniverse = _Universe<IFitSyst>;
 
@@ -45,6 +45,11 @@ namespace ana
     static const FitMultiverse& RandomGas(const std::vector<const IFitSyst*>& systs,
                                           int Nuniv,
                                           unsigned int seed);
+
+    /// \brief Named constructor. Used for creating unweighted data
+    ///
+    /// \param Nuniv Number of universes to generate
+    static const FitMultiverse& Data(int Nuniv);
 
     /// Total number of universes, including nominal at index 0
     unsigned int NUniv() const {return fUnivs.size();}

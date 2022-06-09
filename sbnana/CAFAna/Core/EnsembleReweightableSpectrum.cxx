@@ -402,7 +402,7 @@ namespace ana
   void EnsembleReweightableSpectrum::CheckMultiverses(const FitMultiverse& rhs,
                                                       const std::string& func) const
   {
-    if(&rhs == fMultiverse) return;
+    if(rhs.MultiverseType() == kData || fMultiverse->MultiverseType() == kData || &rhs == fMultiverse) return;
 
     std::cout << "EnsembleReweightableSpectrum::" << func << ": attempting to combine two spectra made with different multiverses: " << std::endl;
     std::cout << "  " << fMultiverse->ShortName() << std::endl;

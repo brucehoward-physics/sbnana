@@ -216,6 +216,24 @@ namespace ana
   }
 
   //----------------------------------------------------------------------
+  const FitMultiverse& FitMultiverse::Data(int Nuniv)
+  {
+    std::string name = "data"+kSep+"nuniv="+std::to_string(Nuniv);
+
+    // Make sure that requesting the same multiverse multiple times always
+    // gives back the same object
+    const FitMultiverse* reg = Registry<FitMultiverse>::ShortNameToPtr(name, true);
+    if(reg) return *reg;
+
+    const std::string latexName = "Data multiverse with "+std::to_string(Nuniv)+" universes";
+
+    std::vector<FitUniverse> univs(Nuniv+1, FitUniverse());
+
+    gFitMultiverses.emplace_back(new FitMultiverse(name, latexName, univs, kData));
+    return *gFitMultiverses.back();
+  }
+
+  //----------------------------------------------------------------------
   void FitMultiverse::SaveTo(TDirectory* dir, const std::string& name) const
   {
     // We could make a whole directory and fill it with a detailed record of
@@ -265,6 +283,10 @@ namespace ana
         const int nsigma = ConsumeLabelIntValue(tokens, "nsigma");
 
         ret = &FitMultiverse::Hypercross(SystNamesToSysts(tokens), nsigma);
+      }
+      else if(type == "data"){
+        const int nuniv = ConsumeLabelIntValue(tokens, "nuniv");
+        ret = &FitMultiverse::Data(nuniv);
       }
       else{
         std::cout << "Multiverse::LoadFrom(): unknown multiverse type '"
