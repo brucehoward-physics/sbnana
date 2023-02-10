@@ -61,11 +61,11 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 // BIGGER DATA SET
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
 // BNB
 // Small set
-const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/BNB_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*/*flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/BNB_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*/*flat*.root";
 
 // In-time cosmic:
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*[1,2,3]*/flat*.root";
@@ -177,8 +177,8 @@ void study ()
     Spectrum sSignal_TrueProtonKE_RES_SpillMV            ( "Proton Kinetic Energy [GeV]", kBinsPZoom, loader, kTrueProtonsKineticEnergy_RES, kNoSpillCut );
     Spectrum sSignal_TrueProtonKE_RES_CheatedReco_SpillMV( "Proton Kinetic Energy [GeV]", kBinsPZoom, loader, kTrueProtonsKineticEnergy_RES_CheatedReco, kNoSpillCut );
     // -- momentum version
-    Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
-    Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
+    Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
+    Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
     // -- selection efficiency:
     Spectrum sSignal_TrueNuE_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
     Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );

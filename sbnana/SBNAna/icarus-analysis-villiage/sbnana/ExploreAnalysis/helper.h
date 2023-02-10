@@ -160,6 +160,8 @@ const Binning kBinsP = Binning::Simple(35,0.,3.5);
 
 const Binning kBinsPZoom = Binning::Simple(25,0.,0.5);
 
+const Binning kBinsProtonPZoom = Binning::Simple(50,0.,1.5);
+
 const Binning kBinsProtonP = Binning::Simple(16,0,1.6);
 const Binning kBinsCounts = Binning::Simple(8,-0.5,7.5);
 
@@ -620,7 +622,7 @@ const Var kRecoProtonPSimple([](const caf::SRSliceProxy* slc) -> float {
                                  ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
         if(Contained) p = trk.rangeP.p_proton;
         else {
-	  std::cout << "Currently kPTrackIndNewProton requires a contained proton... Why am I trying to use MCS here??" << std::endl;
+	        std::cout << "Currently kPTrackIndNewProton requires a contained proton... Why am I trying to use MCS here??" << std::endl;
           p = trk.mcsP.fwdP_proton;
         }
       }
@@ -1277,9 +1279,9 @@ const Cut kProtonTrack400MeV([](const caf::SRSliceProxy* slc) {
 
       float protonp = -1.;
       if(Contained) protonp = trk.rangeP.p_proton;
-      else {
-  	    protonp = trk.mcsP.fwdP_proton;
-	    }
+      //else {
+  	  //  protonp = trk.mcsP.fwdP_proton;
+	    //}
 
       if ( Atslc < 10.0 && trk.pfp.parent_is_primary && Contained && trk.len > maxLength && TMath::Cos(muDir.Angle(pDir)) >= -0.9 && protonp > 0.4 ) {
       	maxLength = trk.len;
@@ -1757,19 +1759,19 @@ const SpillMultiVar kTrueSignalwProtonMuMom ( [](const caf::SRSpillProxy *sr) {
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 13 && prim.length > 50. && prim.contained && prim.length > muonlen ) {
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 2212 ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
-          break;
+          continue;
         }
       }
     }
@@ -1909,19 +1911,19 @@ const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 2212 ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
-          break;
+          continue;
         }
       }
     }
@@ -1974,19 +1976,19 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 2212 ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
-          break;
+          continue;
         }
       }
     }
@@ -2038,19 +2040,19 @@ const SpillMultiVar kNotSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillPr
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           muonlen = prim.length;
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          break;
+          continue;
         }
         else if ( prim.pdg == 2212 ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
-          break;
+          continue;
         }
       }
     }
