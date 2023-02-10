@@ -426,7 +426,7 @@ const Var kPTrackIndNew([](const caf::SRSliceProxy* slc) -> int {
     float Longest(0);
     int PTrackInd(-1);
     for (std::size_t i(0); i < slc->reco.trk.size(); ++i)
-      {
+    {
         auto const& trk = slc->reco.trk.at(i);
         if(trk.bestplane == -1) continue;
 
@@ -442,21 +442,21 @@ const Var kPTrackIndNew([](const caf::SRSliceProxy* slc) -> int {
         const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
         const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
 
-        const bool Contained = ( !isnan(trk.end.x) &&
-				 ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
-				  (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
-				 !isnan(trk.end.y) &&
-				 ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
-				 !isnan(trk.end.z) &&
-				 ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+        const bool Contained = (!isnan(trk.end.x) &&
+                                ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+                                 (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+                                !isnan(trk.end.y) &&
+                                ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+                                !isnan(trk.end.z) &&
+                                ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
         const bool MaybeMuonExiting = ( !Contained && trk.len > 100);
         const bool MaybeMuonContained = ( Contained && Chi2Proton > 60 && Chi2Muon < 30 && trk.len > 50 );
         if ( AtSlice && ( MaybeMuonExiting || MaybeMuonContained ) && trk.len > Longest )
-	  {
-	    Longest = trk.len;
-	    PTrackInd = i;
-	  }
-      }
+    	  {
+	        Longest = trk.len;
+	        PTrackInd = i;
+    	  }
+    }
     return PTrackInd;
   });
 
@@ -467,12 +467,12 @@ const Var kRecoMuonPNew([](const caf::SRSliceProxy* slc) -> float {
       {
         auto const& trk = slc->reco.trk.at(kPTrackIndNew(slc));
         const bool Contained = ( !isnan(trk.end.x) &&
-				 ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
-				  (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
-				 !isnan(trk.end.y) &&
-				 ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
-				 !isnan(trk.end.z) &&
-				 ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+				                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+				                          (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+                                 !isnan(trk.end.y) &&
+                                 ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+                                 !isnan(trk.end.z) &&
+                                 ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
         if(Contained) p = trk.rangeP.p_muon;
         else p = trk.mcsP.fwdP_muon;
       }
@@ -567,10 +567,10 @@ const Var kPTrackIndNewProtonSimple([](const caf::SRSliceProxy* slc) -> int {
 
       float angle = -5.0;
       if ( primaryInd >= 0 ) {
-	const unsigned int idxPrim = (unsigned int)primaryInd;
-	TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
-	TVector3 pDir( slc->reco.trk[idxTrk].dir.x, slc->reco.trk[idxTrk].dir.y, slc->reco.trk[idxTrk].dir.z );
-	angle = TMath::Cos(muDir.Angle(pDir));
+	      const unsigned int idxPrim = (unsigned int)primaryInd;
+	      TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
+	      TVector3 pDir( slc->reco.trk[idxTrk].dir.x, slc->reco.trk[idxTrk].dir.y, slc->reco.trk[idxTrk].dir.z );
+	      angle = TMath::Cos(muDir.Angle(pDir));
       }
 
       // do we want to make the proton cut even tighter on PID
@@ -587,7 +587,7 @@ const Var kRecoProtonP([](const caf::SRSliceProxy* slc) -> float {
     float p(-5.f);
 
     if ( kPTrackIndNewProton(slc) >= 0 )
-      {
+    {
         auto const& trk = slc->reco.trk.at(kPTrackIndNewProton(slc));
         const bool Contained = ( !isnan(trk.end.x) &&
                                  ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
@@ -598,10 +598,10 @@ const Var kRecoProtonP([](const caf::SRSliceProxy* slc) -> float {
                                  ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
         if(Contained) p = trk.rangeP.p_proton;
         else {
-	  std::cout << "Currently kPTrackIndNewProton requires a contained proton... Why am I trying to use MCS here??" << std::endl;
-	  p = trk.mcsP.fwdP_proton;
-	}
-      }
+	        std::cout << "Currently kPTrackIndNewProton requires a contained proton... Why am I trying to use MCS here??" << std::endl;
+	        p = trk.mcsP.fwdP_proton;
+      	}
+    }
     return p;
   });
 
@@ -1069,6 +1069,73 @@ const SpillMultiVar kTrueProtonsKineticEnergy_RES_CheatedReco( [](const caf::SRS
   return protonKEs;
 });
 
+// Same but with momentum not kinetic energy
+const SpillMultiVar kTrueProtonsMomentum( [](const caf::SRSpillProxy *sr) {
+  std::vector<int> g4ids;
+  std::vector<double> ps;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 ){
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        ps.push_back( p );
+      }
+    }
+  }
+
+  return ps;
+});
+
+const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idPs;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 ){
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        g4idPs[prim.G4ID] = p;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ) g4idFound[ g4ids[i] ] = 0;
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& trk : slc.reco.trk ) {
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+    }
+    for ( auto const& shw : slc.reco.shw ) {
+      if ( g4idFound.find( shw.truth.p.G4ID ) != g4idFound.end() ) g4idFound[shw.truth.p.G4ID]+=1;
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idPs[g4id] );
+  }
+
+  return ps;
+});
+
 
 
 
@@ -1140,15 +1207,15 @@ const Cut kProtonTrack([](const caf::SRSliceProxy* slc) {
       if(trk.bestplane == -1) continue;
 
       const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
-				     slc->vertex.y - trk.start.y,
-				     slc->vertex.z - trk.start.z);
+				                             slc->vertex.y - trk.start.y,
+				                             slc->vertex.z - trk.start.z);
       const bool Contained = ( !isnan(trk.end.x) &&
-			       ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
-				(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
-			       !isnan(trk.end.y) &&
-			       ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
-			       !isnan(trk.end.z) &&
-			       ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
 
       // Add Chi2:
       const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
@@ -1156,17 +1223,72 @@ const Cut kProtonTrack([](const caf::SRSliceProxy* slc) {
       if ( Chi2Proton > 100. || Chi2Muon < 30. ) continue;
       ////////////
 
-      if ( Atslc < 10.0 && trk.pfp.parent_is_primary && Contained && trk.len > maxLength ) {
-	maxLength = trk.len;
-	idxScdy = idxTrk;
+      TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
+      TVector3 pDir( trk.dir.x, trk.dir.y, trk.dir.z );
+
+      if ( Atslc < 10.0 && trk.pfp.parent_is_primary && Contained && trk.len > maxLength && TMath::Cos(muDir.Angle(pDir)) >= -0.9 ) {
+      	maxLength = trk.len;
+      	idxScdy = idxTrk;
       }
     }
 
     if ( maxLength < 0. ) return false;
 
-    TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
-    TVector3 pDir( slc->reco.trk[idxScdy].dir.x, slc->reco.trk[idxScdy].dir.y, slc->reco.trk[idxScdy].dir.z );
-    if ( TMath::Cos(muDir.Angle(pDir)) < -0.9 ) return false;
+    return true;
+  });
+
+const Cut kProtonTrack400MeV([](const caf::SRSliceProxy* slc) {
+    int primaryInd = kPTrackIndNew(slc);
+    if ( primaryInd < 0 ) return false;
+
+    unsigned int idxPrim = (unsigned int)primaryInd;
+
+    unsigned int idxScdy = 0;
+    float maxLength = -1;
+
+    for ( unsigned int idxTrk = 0; idxTrk < slc->reco.trk.size(); ++idxTrk ) {
+      if ( idxTrk == idxPrim ) continue; // need a different track...
+
+      // Here I take the vertex determination and containment from kPTrackInd
+      // and check this for meeting the qualificiations
+      // NOTE: updated containment to match FV used here... Do I also want to change the padding?
+      auto const& trk = slc->reco.trk.at(idxTrk);
+      if(trk.bestplane == -1) continue;
+
+      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
+				                             slc->vertex.y - trk.start.y,
+				                             slc->vertex.z - trk.start.z);
+      const bool Contained = ( !isnan(trk.end.x) &&
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+
+      // Add Chi2:
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+      if ( Chi2Proton > 100. || Chi2Muon < 30. ) continue;
+      ////////////
+
+      TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
+      TVector3 pDir( trk.dir.x, trk.dir.y, trk.dir.z );
+
+      float protonp = -1.;
+      if(Contained) protonp = trk.rangeP.p_proton;
+      else {
+  	    protonp = trk.mcsP.fwdP_proton;
+	    }
+
+      if ( Atslc < 10.0 && trk.pfp.parent_is_primary && Contained && trk.len > maxLength && TMath::Cos(muDir.Angle(pDir)) >= -0.9 && protonp > 0.4 ) {
+      	maxLength = trk.len;
+      	idxScdy = idxTrk;
+      }
+    }
+
+    if ( maxLength < 0. ) return false;
+
     return true;
   });
 
@@ -1616,6 +1738,48 @@ const SpillMultiVar kTrueSignalEnu ( [](const caf::SRSpillProxy *sr) {
   return signalEnu;
 });
 
+const SpillMultiVar kTrueSignalwProtonMuMom ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalMuMom;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    bool signalLepton = false;
+    bool signalHadron = false;
+
+    float muonlen = -1.;
+    float muonp = -1.;
+
+    if ( abs(nu.pdg) == 14 &&
+				 nu.iscc &&
+				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
+      for ( auto const& prim : nu.prim ) {
+        if ( prim.pdg == 13 && prim.length > 100. && prim.length > muonlen ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained && prim.length > muonlen ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 2212 ) {
+          float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          if ( p > 0.4 )
+            signalHadron = true;
+          break;
+        }
+      }
+    }
+
+		if ( signalLepton && signalHadron && muonlen > 0. ) signalMuMom.push_back( muonp );
+  }
+
+  return signalMuMom;
+});
+
 const SpillMultiVar kTrueSignalLnu ( [](const caf::SRSpillProxy *sr) {
   std::vector<double> signalLnu;
 
@@ -1627,11 +1791,11 @@ const SpillMultiVar kTrueSignalLnu ( [](const caf::SRSpillProxy *sr) {
 				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
 				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
       for ( auto const& prim : nu.prim ) {
-        if ( prim.pdg == 2212 && prim.length > 100. ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
           signalLepton = true;
           break;
         }
-        else if ( prim.pdg == 2212 && prim.length > 50. && prim.contained ) {
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           break;
         }
@@ -1655,11 +1819,11 @@ const SpillMultiVar kTrueSignalLOverEnu ( [](const caf::SRSpillProxy *sr) {
 				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
 				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
       for ( auto const& prim : nu.prim ) {
-        if ( prim.pdg == 2212 && prim.length > 100. ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
           signalLepton = true;
           break;
         }
-        else if ( prim.pdg == 2212 && prim.length > 50. && prim.contained ) {
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           break;
         }
@@ -1687,11 +1851,11 @@ const SpillMultiVar kTrueSignalEnuSelected ( [](const caf::SRSpillProxy *sr) {
 				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
 				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
       for ( auto const& prim : nu.prim ) {
-        if ( prim.pdg == 2212 && prim.length > 100. ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
           signalLepton = true;
           break;
         }
-        else if ( prim.pdg == 2212 && prim.length > 50. && prim.contained ) {
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           break;
         }
@@ -1722,6 +1886,197 @@ const SpillMultiVar kTrueSignalEnuSelected ( [](const caf::SRSpillProxy *sr) {
   }
 
   return signalEnu;
+});
+
+const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalMuMom;
+  std::map<int, double> signalIndexMuMom;
+  unsigned int count = 0;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    bool signalLepton = false;
+    bool signalHadron = false;
+
+    float muonlen = -1.;
+    float muonp = -1.;
+
+    if ( abs(nu.pdg) == 14 &&
+				 nu.iscc &&
+				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
+      for ( auto const& prim : nu.prim ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 2212 ) {
+          float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          if ( p > 0.4 )
+            signalHadron = true;
+          break;
+        }
+      }
+    }
+
+		if ( signalLepton && signalHadron && muonlen > 0. ) {
+      signalIndexMuMom[ nu.index ] = muonp;
+      count+=1;
+    }
+  }
+
+  if ( count == 0 ) return signalMuMom;
+
+  for ( auto const& slc : sr->slc ) {
+    if ( slc.truth.index < 0 ) continue;
+    else if ( signalIndexMuMom.find( slc.truth.index ) == signalIndexMuMom.end() ) continue;
+
+    // Check if slice passes cuts:
+    if ( kRFiducialNew(&slc) &&
+         kNotClearCosmic(&slc) &&
+         kCutCRLongTrkDirY(&slc) &&
+         kPTrackNew(&slc) &&
+         kProtonTrack400MeV(&slc) ) {
+      signalMuMom.push_back( signalIndexMuMom.at(slc.truth.index) );
+      signalIndexMuMom.erase( slc.truth.index ); // should prevent duplicates
+    }
+  }
+
+  return signalMuMom;
+});
+
+// --- RECO VERSIONS FOR PURITY
+const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalMuMom;
+  std::map<int, double> signalIndexMuMom;
+  unsigned int count = 0;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    bool signalLepton = false;
+    bool signalHadron = false;
+
+    float muonlen = -1.;
+    float muonp = -1.;
+
+    if ( abs(nu.pdg) == 14 &&
+				 nu.iscc &&
+				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
+      for ( auto const& prim : nu.prim ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 2212 ) {
+          float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          if ( p > 0.4 )
+            signalHadron = true;
+          break;
+        }
+      }
+    }
+
+		if ( signalLepton && signalHadron && muonlen > 0. ) {
+      signalIndexMuMom[ nu.index ] = muonp;
+      count+=1;
+    }
+  }
+
+  if ( count == 0 ) return signalMuMom;
+
+  for ( auto const& slc : sr->slc ) {
+    if ( slc.truth.index < 0 ) continue;
+    else if ( signalIndexMuMom.find( slc.truth.index ) == signalIndexMuMom.end() ) continue;
+
+    // Check if slice passes cuts:
+    if ( kRFiducialNew(&slc) &&
+         kNotClearCosmic(&slc) &&
+         kCutCRLongTrkDirY(&slc) &&
+         kPTrackNew(&slc) &&
+         kProtonTrack400MeV(&slc) ) {
+      signalMuMom.push_back( kRecoMuonPNew(&slc) );
+      signalIndexMuMom.erase( slc.truth.index ); // should prevent duplicates
+    }
+  }
+
+  return signalMuMom;
+});
+
+const SpillMultiVar kNotSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalMuMom;
+  std::map<int, double> signalIndexMuMom;
+  unsigned int count = 0;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    bool signalLepton = false;
+    bool signalHadron = false;
+
+    float muonlen = -1.;
+    float muonp = -1.;
+
+    if ( abs(nu.pdg) == 14 &&
+				 nu.iscc &&
+				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
+      for ( auto const& prim : nu.prim ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
+          signalLepton = true;
+          muonlen = prim.length;
+          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          break;
+        }
+        else if ( prim.pdg == 2212 ) {
+          float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+          if ( p > 0.4 )
+            signalHadron = true;
+          break;
+        }
+      }
+    }
+
+		if ( signalLepton && signalHadron && muonlen > 0. ) {
+      signalIndexMuMom[ nu.index ] = muonp;
+      count+=1;
+    }
+  }
+
+  if ( count == 0 ) return signalMuMom;
+
+  for ( auto const& slc : sr->slc ) {
+    if ( signalIndexMuMom.find( slc.truth.index ) != signalIndexMuMom.end() ) continue;
+
+    // Check if slice passes cuts:
+    if ( kRFiducialNew(&slc) &&
+         kNotClearCosmic(&slc) &&
+         kCutCRLongTrkDirY(&slc) &&
+         kPTrackNew(&slc) &&
+         kProtonTrack400MeV(&slc) ) {
+      signalMuMom.push_back( kRecoMuonPNew(&slc) );
+    }
+  }
+
+  return signalMuMom;
 });
 
 

@@ -176,9 +176,16 @@ void study ()
     Spectrum sSignal_TrueProtonKE_CheatedReco_SpillMV    ( "Proton Kinetic Energy [GeV]", kBinsPZoom, loader, kTrueProtonsKineticEnergy_CheatedReco, kNoSpillCut );
     Spectrum sSignal_TrueProtonKE_RES_SpillMV            ( "Proton Kinetic Energy [GeV]", kBinsPZoom, loader, kTrueProtonsKineticEnergy_RES, kNoSpillCut );
     Spectrum sSignal_TrueProtonKE_RES_CheatedReco_SpillMV( "Proton Kinetic Energy [GeV]", kBinsPZoom, loader, kTrueProtonsKineticEnergy_RES_CheatedReco, kNoSpillCut );
+    // -- momentum version
+    Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
+    Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
     // -- selection efficiency:
     Spectrum sSignal_TrueNuE_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
     Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );
+    Spectrum sSignalwProton_TrueMuMom_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonMuMom, kNoSpillCut );
+    Spectrum sSignalwProton_TrueMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonMuMomSelected, kNoSpillCut );
+    Spectrum sSignalwProton_RecoMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonRecoMuMomSelected, kNoSpillCut );
+    Spectrum sNotTrueSignal_RecoMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kNotSignalwProtonRecoMuMomSelected, kNoSpillCut );
 
     Spectrum sSignal_TrueNuL_SpillMV ( "True Baseline [m]", kBinsL, loader, kTrueSignalLnu, kNoSpillCut );
     Spectrum sSignal_TrueNuLOverE_SpillMV ( "True L/E [m/MeV]", kBinsLE, loader, kTrueSignalLOverEnu, kNoSpillCut );
@@ -446,8 +453,15 @@ void study ()
     sSignal_TrueProtonKE_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonKE_CheatedReco_SpillMV") );
     sSignal_TrueProtonKE_RES_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonKE_RES_CheatedReco_SpillMV") );
 
+    sSignal_TrueProtonMom_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_SpillMV") );
+    sSignal_TrueProtonMom_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_CheatedReco_SpillMV") );
+
     sSignal_TrueNuE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_SpillMV") );
     sSignal_TrueNuE_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_Selct_SpillMV") );
+    sSignalwProton_TrueMuMom_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_TrueMuMom_SpillMV") );
+    sSignalwProton_TrueMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_TrueMuMom_Selct_SpillMV") );
+    sSignalwProton_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_RecoMuMom_Selct_SpillMV") );
+    sNotTrueSignal_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sNotTrueSignal_RecoMuMom_Selct_SpillMV") );
 
     sSignal_TrueNuL_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuL_SpillMV") );
     sSignal_TrueNuLOverE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuLOverE_SpillMV") );
@@ -684,8 +698,15 @@ void study ()
   Spectrum *sSignal_TrueProtonKE_RES_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonKE_RES_SpillMV").release();
   Spectrum *sSignal_TrueProtonKE_RES_CheatedReco_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonKE_RES_CheatedReco_SpillMV").release();
 
+  Spectrum *sSignal_TrueProtonMom_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_SpillMV").release();
+  Spectrum *sSignal_TrueProtonMom_CheatedReco_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_CheatedReco_SpillMV").release();
+
   Spectrum *sSignal_TrueNuE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_SpillMV").release();
   Spectrum *sSignal_TrueNuE_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_Selct_SpillMV").release();
+  Spectrum *sSignalwProton_TrueMuMom_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_TrueMuMom_SpillMV").release();
+  Spectrum *sSignalwProton_TrueMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_TrueMuMom_Selct_SpillMV").release();
+  Spectrum *sSignalwProton_RecoMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_RecoMuMom_Selct_SpillMV").release();
+  Spectrum *sNotTrueSignal_RecoMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sNotTrueSignal_RecoMuMom_Selct_SpillMV").release();
 
   Spectrum *sSignal_TrueNuL_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuL_SpillMV").release();
   Spectrum *sSignal_TrueNuLOverE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuLOverE_SpillMV").release();
@@ -960,10 +981,26 @@ void study ()
   Ratio rsSignal_TrueProtonKE_RES_SpillMV( *sSignal_TrueProtonKE_RES_CheatedReco_SpillMV, *sSignal_TrueProtonKE_RES_SpillMV, true );
   TH1* rSignal_TrueProtonKE_RES_SpillMV = rsSignal_TrueProtonKE_RES_SpillMV.ToTH1( kBlack );
 
+  TH1* hSignal_TrueProtonMom_SpillMV = sSignal_TrueProtonMom_SpillMV->ToTH1( pot, kBlack );
+  TH1* hSignal_TrueProtonMom_CheatedReco_SpillMV = sSignal_TrueProtonMom_CheatedReco_SpillMV->ToTH1( pot, kRed );
+  Ratio rsSignal_TrueProtonMom_SpillMV( *sSignal_TrueProtonMom_CheatedReco_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
+  TH1* rSignal_TrueProtonMom_SpillMV = rsSignal_TrueProtonMom_SpillMV.ToTH1( kBlack );
+
   TH1* hSignal_TrueNuE_SpillMV = sSignal_TrueNuE_SpillMV->ToTH1( pot, kBlack );
   TH1* hSignal_TrueNuE_Selct_SpillMV = sSignal_TrueNuE_Selct_SpillMV->ToTH1( pot, kRed );
   Ratio rsSignal_TrueNuE_SpillMV( *sSignal_TrueNuE_Selct_SpillMV, *sSignal_TrueNuE_SpillMV, true );
   TH1* rSignal_TrueNuE_SpillMV = rsSignal_TrueNuE_SpillMV.ToTH1( kBlack );
+
+  TH1* hSignalwProton_TrueMuMom_SpillMV = sSignalwProton_TrueMuMom_SpillMV->ToTH1( pot, kBlack );
+  TH1* hSignalwProton_TrueMuMom_Selct_SpillMV = sSignalwProton_TrueMuMom_Selct_SpillMV->ToTH1( pot, kRed );
+  Ratio rsSignalwProton_TrueMuMom_SpillMV( *sSignalwProton_TrueMuMom_Selct_SpillMV, *sSignalwProton_TrueMuMom_SpillMV, true );
+  TH1* rSignalwProton_TrueMuMom_SpillMV = rsSignalwProton_TrueMuMom_SpillMV.ToTH1( kBlack );
+
+  TH1* hSignalwProton_RecoMuMom_Selct_SpillMV = sSignalwProton_RecoMuMom_Selct_SpillMV->ToTH1( pot, kBlack );
+  TH1* hNotTrueSignal_RecoMuMom_Selct_SpillMV = sNotTrueSignal_RecoMuMom_Selct_SpillMV->ToTH1( pot, kRed );
+  Ratio rsSignalwProton_RecoMuMom_Selct_SpillMV( *sSignalwProton_RecoMuMom_Selct_SpillMV, *sSignalwProton_RecoMuMom_Selct_SpillMV + *sNotTrueSignal_RecoMuMom_Selct_SpillMV, true );
+  TH1* rSignalwProton_RecoMuMom_Selct_SpillMV = rsSignalwProton_RecoMuMom_Selct_SpillMV.ToTH1( kRed );
+
 
   TH1* hSignal_TrueNuL_SpillMV = sSignal_TrueNuL_SpillMV->ToTH1( pot, kBlack );
   TH1* hSignal_TrueNuLOverE_SpillMV = sSignal_TrueNuLOverE_SpillMV->ToTH1( pot, kBlack );
@@ -1477,6 +1514,20 @@ void study ()
   rSignal_TrueProtonKE_RES_SpillMV->Draw("");
   gPad->Print("Spectrum_TrueProtonKE_RES_CheatedRecoEff.pdf");
 
+  new TCanvas;
+  TLegend *tL_TrueProtonMom = new TLegend(0.6,0.6,0.87,0.87);
+  tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_SpillMV, "True |p| distribution", "l" );
+  tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_CheatedReco_SpillMV, "True |p| w reco match", "l" );
+
+  hSignal_TrueProtonMom_SpillMV->Draw("hist");
+  hSignal_TrueProtonMom_CheatedReco_SpillMV->Draw("hist same");
+  tL_TrueProtonMom->Draw();
+  gPad->Print("Spectrum_TrueProtonMom.pdf");
+
+  new TCanvas;
+  rSignal_TrueProtonMom_SpillMV->Draw("");
+  gPad->Print("Spectrum_TrueProtonMom_CheatedRecoEff.pdf");
+
   // neutrino E
   new TCanvas;
   hSignal_TrueNuE_SpillMV->Draw("hist");
@@ -1486,6 +1537,24 @@ void study ()
   new TCanvas;
   rSignal_TrueNuE_SpillMV->Draw("");
   gPad->Print("Spectrum_Signal_TrueNuE_Selct_Eff.pdf");
+
+  new TCanvas;
+  hSignalwProton_TrueMuMom_SpillMV->Draw("hist");
+  hSignalwProton_TrueMuMom_Selct_SpillMV->Draw("hist same");
+  gPad->Print("Spectrum_SignalwProton_TrueMuMom_Selct.pdf");
+
+  new TCanvas;
+  hSignalwProton_RecoMuMom_Selct_SpillMV->Draw("hist");
+  hNotTrueSignal_RecoMuMom_Selct_SpillMV->Draw("hist same");
+  gPad->Print("Spectrum_SignalAndNotSignal_RecoMuMom_Selct.pdf");
+
+  new TCanvas;
+  rSignalwProton_TrueMuMom_SpillMV->Draw("");
+  gPad->Print("Spectrum_SignalwProton_TrueMuMom_Selct_Eff.pdf");
+  
+  new TCanvas;
+  rSignalwProton_RecoMuMom_Selct_SpillMV->Draw("");
+  gPad->Print("Spectrum_SignalwProton_RecoMuMom_Selct_Pur.pdf");
 
   // Angles...
   new TCanvas;
