@@ -1723,11 +1723,11 @@ const SpillMultiVar kTrueSignalEnu ( [](const caf::SRSpillProxy *sr) {
 				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
 				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
       for ( auto const& prim : nu.prim ) {
-        if ( prim.pdg == 2212 && prim.length > 100. ) {
+        if ( prim.pdg == 13 && prim.length > 100. ) {
           signalLepton = true;
           break;
         }
-        else if ( prim.pdg == 2212 && prim.length > 50. && prim.contained ) {
+        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
           signalLepton = true;
           break;
         }
@@ -1767,7 +1767,7 @@ const SpillMultiVar kTrueSignalwProtonMuMom ( [](const caf::SRSpillProxy *sr) {
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           continue;
         }
-        else if ( prim.pdg == 2212 ) {
+        else if ( prim.pdg == 2212 && !signalHadron ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
@@ -1919,7 +1919,7 @@ const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           continue;
         }
-        else if ( prim.pdg == 2212 ) {
+        else if ( prim.pdg == 2212 && !signalHadron ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
@@ -1984,7 +1984,7 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
           muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           continue;
         }
-        else if ( prim.pdg == 2212 ) {
+        else if ( prim.pdg == 2212 && !signalHadron ) {
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
@@ -2019,55 +2019,10 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
   return signalMuMom;
 });
 
-const SpillMultiVar kNotSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillProxy *sr) {
+const SpillMultiVar kAllwProtonRecoMuMomSelected ( [](const caf::SRSpillProxy *sr) {
   std::vector<double> signalMuMom;
-  std::map<int, double> signalIndexMuMom;
-  unsigned int count = 0;
-
-  for ( auto const& nu : sr->mc.nu ) {
-    bool signalLepton = false;
-    bool signalHadron = false;
-
-    float muonlen = -1.;
-    float muonp = -1.;
-
-    if ( abs(nu.pdg) == 14 &&
-				 nu.iscc &&
-				 !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
-				 isInFV(nu.position.x,nu.position.y,nu.position.z) ) {
-      for ( auto const& prim : nu.prim ) {
-        if ( prim.pdg == 13 && prim.length > 100. ) {
-          signalLepton = true;
-          muonlen = prim.length;
-          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          continue;
-        }
-        else if ( prim.pdg == 13 && prim.length > 50. && prim.contained ) {
-          signalLepton = true;
-          muonlen = prim.length;
-          muonp = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          continue;
-        }
-        else if ( prim.pdg == 2212 ) {
-          float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          if ( p > 0.4 )
-            signalHadron = true;
-          continue;
-        }
-      }
-    }
-
-		if ( signalLepton && signalHadron && muonlen > 0. ) {
-      signalIndexMuMom[ nu.index ] = muonp;
-      count+=1;
-    }
-  }
-
-  if ( count == 0 ) return signalMuMom;
 
   for ( auto const& slc : sr->slc ) {
-    if ( signalIndexMuMom.find( slc.truth.index ) != signalIndexMuMom.end() ) continue;
-
     // Check if slice passes cuts:
     if ( kRFiducialNew(&slc) &&
          kNotClearCosmic(&slc) &&

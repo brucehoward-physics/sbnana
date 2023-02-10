@@ -180,17 +180,18 @@ void study ()
     Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
     Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
     // -- selection efficiency:
-    Spectrum sSignal_TrueNuE_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
-    Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );
-    Spectrum sSignalwProton_TrueMuMom_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonMuMom, kNoSpillCut );
-    Spectrum sSignalwProton_TrueMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonMuMomSelected, kNoSpillCut );
-    Spectrum sSignalwProton_RecoMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueSignalwProtonRecoMuMomSelected, kNoSpillCut );
-    Spectrum sNotTrueSignal_RecoMuMom_Selct_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kNotSignalwProtonRecoMuMomSelected, kNoSpillCut );
+    Spectrum sSignal_TrueNuE_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
+    Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );
+    Spectrum sSignalwProton_TrueMuMom_SpillMV ( "True #mu momentum [GeV/c]", kBinsP, loader, kTrueSignalwProtonMuMom, kNoSpillCut );
+    Spectrum sSignalwProton_TrueMuMom_Selct_SpillMV ( "True #mu momentum [GeV/c]", kBinsP, loader, kTrueSignalwProtonMuMomSelected, kNoSpillCut );
+    Spectrum sSignalwProton_RecoMuMom_Selct_SpillMV ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kTrueSignalwProtonRecoMuMomSelected, kNoSpillCut );
+    Spectrum sAll_RecoMuMom_Selct_SpillMV ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kAllwProtonRecoMuMomSelected, kNoSpillCut );
+    Spectrum sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic ( "Reco #mu momentum [GeV/c]", kBinsP, loaderInTime, kAllwProtonRecoMuMomSelected, kNoSpillCut );
 
     Spectrum sSignal_TrueNuL_SpillMV ( "True Baseline [m]", kBinsL, loader, kTrueSignalLnu, kNoSpillCut );
     Spectrum sSignal_TrueNuLOverE_SpillMV ( "True L/E [m/MeV]", kBinsLE, loader, kTrueSignalLOverEnu, kNoSpillCut );
 
-    Spectrum sNumuCC_TrueNuE_SpillMV ( "True Nu Energy [GeV]", kBinsE, loader, kTrueNumuCCEnu, kNoSpillCut );
+    Spectrum sNumuCC_TrueNuE_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueNumuCCEnu, kNoSpillCut );
     Spectrum sNumuCC_TrueNuL_SpillMV ( "True Baseline [m]", kBinsL, loader, kTrueNumuCCLnu, kNoSpillCut );
     Spectrum sNumuCC_TrueNuLOverE_SpillMV ( "True L/E [m/MeV]", kBinsLE, loader, kTrueNumuCCLOverEnu, kNoSpillCut );
 
@@ -461,7 +462,8 @@ void study ()
     sSignalwProton_TrueMuMom_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_TrueMuMom_SpillMV") );
     sSignalwProton_TrueMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_TrueMuMom_Selct_SpillMV") );
     sSignalwProton_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_RecoMuMom_Selct_SpillMV") );
-    sNotTrueSignal_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sNotTrueSignal_RecoMuMom_Selct_SpillMV") );
+    sAll_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sAll_RecoMuMom_Selct_SpillMV") );
+    sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic.SaveTo( fSpec->mkdir("sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic") );
 
     sSignal_TrueNuL_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuL_SpillMV") );
     sSignal_TrueNuLOverE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuLOverE_SpillMV") );
@@ -706,7 +708,8 @@ void study ()
   Spectrum *sSignalwProton_TrueMuMom_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_TrueMuMom_SpillMV").release();
   Spectrum *sSignalwProton_TrueMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_TrueMuMom_Selct_SpillMV").release();
   Spectrum *sSignalwProton_RecoMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_RecoMuMom_Selct_SpillMV").release();
-  Spectrum *sNotTrueSignal_RecoMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sNotTrueSignal_RecoMuMom_Selct_SpillMV").release();
+  Spectrum *sAll_RecoMuMom_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sAll_RecoMuMom_Selct_SpillMV").release();
+  Spectrum *sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic = LoadFromFile<Spectrum>(fLoad,"sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic").release();
 
   Spectrum *sSignal_TrueNuL_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuL_SpillMV").release();
   Spectrum *sSignal_TrueNuLOverE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuLOverE_SpillMV").release();
@@ -997,10 +1000,14 @@ void study ()
   TH1* rSignalwProton_TrueMuMom_SpillMV = rsSignalwProton_TrueMuMom_SpillMV.ToTH1( kBlack );
 
   TH1* hSignalwProton_RecoMuMom_Selct_SpillMV = sSignalwProton_RecoMuMom_Selct_SpillMV->ToTH1( pot, kBlack );
-  TH1* hNotTrueSignal_RecoMuMom_Selct_SpillMV = sNotTrueSignal_RecoMuMom_Selct_SpillMV->ToTH1( pot, kRed );
-  Ratio rsSignalwProton_RecoMuMom_Selct_SpillMV( *sSignalwProton_RecoMuMom_Selct_SpillMV, *sSignalwProton_RecoMuMom_Selct_SpillMV + *sNotTrueSignal_RecoMuMom_Selct_SpillMV, true );
-  TH1* rSignalwProton_RecoMuMom_Selct_SpillMV = rsSignalwProton_RecoMuMom_Selct_SpillMV.ToTH1( kRed );
-
+  TH1* rSignalwProton_RecoMuMom_Selct_SpillMV = sSignalwProton_RecoMuMom_Selct_SpillMV->ToTH1( pot, kBlack );
+  TH1* hAll_RecoMuMom_Selct_SpillMV = sAll_RecoMuMom_Selct_SpillMV->ToTH1( pot, kRed );
+  hAll_RecoMuMom_Selct_SpillMV->Add( sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic->ToTH1(cosmicLivetime, kRed, kSolid, kLivetime ) );
+  // Here using Ratio doesn't quite work because the exposure definitions are different...
+  //   Ratio rsSignalwProton_RecoMuMom_Selct_SpillMV( *sSignalwProton_RecoMuMom_Selct_SpillMV, *sAll_RecoMuMom_Selct_SpillMV + *sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic, true );
+  //   TH1* rSignalwProton_RecoMuMom_Selct_SpillMV = rsSignalwProton_RecoMuMom_Selct_SpillMV.ToTH1( kRed );
+  // Instead, we will divide histograms
+  rSignalwProton_RecoMuMom_Selct_SpillMV->Divide(rSignalwProton_RecoMuMom_Selct_SpillMV,hAll_RecoMuMom_Selct_SpillMV,1,1,"B");
 
   TH1* hSignal_TrueNuL_SpillMV = sSignal_TrueNuL_SpillMV->ToTH1( pot, kBlack );
   TH1* hSignal_TrueNuLOverE_SpillMV = sSignal_TrueNuLOverE_SpillMV->ToTH1( pot, kBlack );
@@ -1544,8 +1551,8 @@ void study ()
   gPad->Print("Spectrum_SignalwProton_TrueMuMom_Selct.pdf");
 
   new TCanvas;
-  hSignalwProton_RecoMuMom_Selct_SpillMV->Draw("hist");
-  hNotTrueSignal_RecoMuMom_Selct_SpillMV->Draw("hist same");
+  hAll_RecoMuMom_Selct_SpillMV->Draw("hist");
+  hSignalwProton_RecoMuMom_Selct_SpillMV->Draw("hist same");
   gPad->Print("Spectrum_SignalAndNotSignal_RecoMuMom_Selct.pdf");
 
   new TCanvas;
