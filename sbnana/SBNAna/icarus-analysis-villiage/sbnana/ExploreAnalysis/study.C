@@ -59,9 +59,9 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 
 // NU + COSMIC
 // BIGGER DATA SET
-//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
 // BNB
 // Small set
@@ -194,6 +194,29 @@ void study ()
     Spectrum sNumuCC_TrueNuE_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueNumuCCEnu, kNoSpillCut );
     Spectrum sNumuCC_TrueNuL_SpillMV ( "True Baseline [m]", kBinsL, loader, kTrueNumuCCLnu, kNoSpillCut );
     Spectrum sNumuCC_TrueNuLOverE_SpillMV ( "True L/E [m/MeV]", kBinsLE, loader, kTrueNumuCCLOverEnu, kNoSpillCut );
+
+
+    // ----- Apply same selection as in sAll_RecoMuMom_Selct_SpillMV
+    // ----- BASE SELECTION: kNuMI1Mu1PSelection
+    // ----- TRUTH GROUPINGS:
+    // -------- Signal: k1Mu1P_TrueSigTopology
+    // -------- k1Mu1P_SliceIsNumuCC_MuLengthWrong
+    // -------- k1Mu1P_SliceIsNumuCC_PWrong
+    // -------- k1Mu1P_SliceIsNumuCC_BothWrong
+    // -------- k1Mu1P_SliceIsNumuCC_NonFiducial
+    // -------- k1Mu1P_SliceIsNumuCC_Other
+    // -------- k1Mu1P_SliceIsNuOther
+    // -------- k1Mu1P_SliceIsCosmic
+    Spectrum sSignalwProton_recoMuMom_BaseSliceSel ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection );
+    Spectrum sSignalwProton_recoMuMom_TrueSignal   ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_TrueSigTopology );
+    Spectrum sSignalwProton_recoMuMom_NumuMuWrong  ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNumuCC_MuLengthWrong );
+    Spectrum sSignalwProton_recoMuMom_NumuPWrong   ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNumuCC_PWrong );
+    Spectrum sSignalwProton_recoMuMom_NumuBothWrong( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNumuCC_BothWrong );
+    Spectrum sSignalwProton_recoMuMom_NumuNonFidVol( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNumuCC_NonFiducial );
+    Spectrum sSignalwProton_recoMuMom_NumuOther    ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNumuCC_Other );
+    Spectrum sSignalwProton_recoMuMom_NuOther      ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsNuOther );
+    Spectrum sSignalwProton_recoMuMom_Cosmic       ( "Reco #mu momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsCosmic );
+    Spectrum sSignalwProton_recoMuMom_Cosmic_InTime( "Reco #mu momentum [GeV/c]", kBinsP, loaderInTime, kRecoMuonPNew, kNoSpillCut, kNuMI1Mu1PSelection && k1Mu1P_SliceIsCosmic );
 
     // -- SpillVars looking at muons from neutrinos somewhat broadly
     Spectrum sNuMIMuons_CosThXZ ( "Cos(ThXZ)", kBinsCosTh, loader, kSingleMatchCosThXZ, kNoSpillCut );
@@ -464,6 +487,17 @@ void study ()
     sSignalwProton_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignalwProton_RecoMuMom_Selct_SpillMV") );
     sAll_RecoMuMom_Selct_SpillMV.SaveTo( fSpec->mkdir("sAll_RecoMuMom_Selct_SpillMV") );
     sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic.SaveTo( fSpec->mkdir("sAll_RecoMuMom_Selct_SpillMV_InTimeCosmic") );
+
+    sSignalwProton_recoMuMom_BaseSliceSel.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_BaseSliceSel") );
+    sSignalwProton_recoMuMom_TrueSignal.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_TrueSignal") );
+    sSignalwProton_recoMuMom_NumuMuWrong.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NumuMuWrong") );
+    sSignalwProton_recoMuMom_NumuPWrong.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NumuPWrong") );
+    sSignalwProton_recoMuMom_NumuBothWrong.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NumuBothWrong") );
+    sSignalwProton_recoMuMom_NumuNonFidVol.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NumuNonFidVol") );
+    sSignalwProton_recoMuMom_NumuOther.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NumuOther") );
+    sSignalwProton_recoMuMom_NuOther.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_NuOther") );
+    sSignalwProton_recoMuMom_Cosmic.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_Cosmic") );
+    sSignalwProton_recoMuMom_Cosmic_InTime.SaveTo( fSpec->mkdir("sSignalwProton_recoMuMom_Cosmic_InTime") );
 
     sSignal_TrueNuL_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuL_SpillMV") );
     sSignal_TrueNuLOverE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuLOverE_SpillMV") );
@@ -853,6 +887,19 @@ void study ()
   Spectrum *sSignalDIS_SelRes = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_SelRes").release();
   Spectrum *sSignalCOH_SelRes = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_SelRes").release();
 
+  // Spectra for 1MuNP selection
+  Spectrum *sSignalwProton_recoMuMom_BaseSliceSel = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_BaseSliceSel").release();
+  Spectrum *sSignalwProton_recoMuMom_TrueSignal = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_TrueSignal").release();
+  Spectrum *sSignalwProton_recoMuMom_NumuMuWrong = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NumuMuWrong").release();
+  Spectrum *sSignalwProton_recoMuMom_NumuPWrong = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NumuPWrong").release();
+  Spectrum *sSignalwProton_recoMuMom_NumuBothWrong = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NumuBothWrong").release();
+  Spectrum *sSignalwProton_recoMuMom_NumuNonFidVol = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NumuNonFidVol").release();
+  Spectrum *sSignalwProton_recoMuMom_NumuOther = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NumuOther").release();
+  Spectrum *sSignalwProton_recoMuMom_NuOther = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_NuOther").release();
+  Spectrum *sSignalwProton_recoMuMom_Cosmic = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_Cosmic").release();
+  Spectrum *sSignalwProton_recoMuMom_Cosmic_InTime = LoadFromFile<Spectrum>(fLoad,"sSignalwProton_recoMuMom_Cosmic_InTime").release();
+
+
   // Scale in-time cosmic background (see https://github.com/SBNSoftware/sbnana/blob/develop/sbnana/SBNAna/anademo/demo_exposure.C)
   const double nomIntensity = 5.0e13;
   const double nomLivetime = pot / nomIntensity;
@@ -897,6 +944,9 @@ void study ()
 
   TH1* hAll_SelRes     = sAll_SelRes->ToTH1( pot, kBlack );
   hAll_SelRes->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
+  TH1* hSignalwProton_recoMuMom_BaseSliceSel = sSignalwProton_recoMuMom_BaseSliceSel->ToTH1( pot, kBlack );
+  hSignalwProton_recoMuMom_BaseSliceSel->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
 
   TH1* hSignal_NoCut    = sSignal_NoCut->ToTH1( pot, colorwheel[0] );    hSignal_NoCut->SetFillColor(colorwheel[0]);
@@ -1158,6 +1208,26 @@ void study ()
   TH1* hSignalCOH_SelRes = sSignalCOH_SelRes->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_SelRes->SetFillColor(colorwheel_mode[4]);
   TH1* hSignalELS_SelRes = sOtherNuCC_SelRes->ToTH1( pot, colorwheel_mode[5] ); hSignalELS_SelRes->SetFillColor(colorwheel_mode[5]);
 
+  // colorwheel_class for the colors here
+  TH1* hSignalwProton_recoMuMom_TrueSignal = sSignalwProton_recoMuMom_TrueSignal->ToTH1( pot, colorwheel_class[0] );
+  hSignalwProton_recoMuMom_TrueSignal->SetFillColor(colorwheel_class[0]);
+  TH1* hSignalwProton_recoMuMom_NumuMuWrong = sSignalwProton_recoMuMom_NumuMuWrong->ToTH1( pot, colorwheel_class[1] );
+  hSignalwProton_recoMuMom_NumuMuWrong->SetFillColor(colorwheel_class[1]);
+  TH1* hSignalwProton_recoMuMom_NumuPWrong = sSignalwProton_recoMuMom_NumuPWrong->ToTH1( pot, colorwheel_class[2] );
+  hSignalwProton_recoMuMom_NumuPWrong->SetFillColor(colorwheel_class[2]);
+  TH1* hSignalwProton_recoMuMom_NumuBothWrong = sSignalwProton_recoMuMom_NumuBothWrong->ToTH1( pot, colorwheel_class[3] );
+  hSignalwProton_recoMuMom_NumuBothWrong->SetFillColor(colorwheel_class[3]);
+  TH1* hSignalwProton_recoMuMom_NumuNonFidVol = sSignalwProton_recoMuMom_NumuNonFidVol->ToTH1( pot, colorwheel_class[4] );
+  hSignalwProton_recoMuMom_NumuNonFidVol->SetFillColor(colorwheel_class[4]);
+  TH1* hSignalwProton_recoMuMom_NumuOther = sSignalwProton_recoMuMom_NumuOther->ToTH1( pot, colorwheel_class[5] );
+  hSignalwProton_recoMuMom_NumuOther->SetFillColor(colorwheel_class[5]);
+  TH1* hSignalwProton_recoMuMom_NuOther = sSignalwProton_recoMuMom_NuOther->ToTH1( pot, colorwheel_class[6] );
+  hSignalwProton_recoMuMom_NuOther->SetFillColor(colorwheel_class[6]);
+  TH1* hSignalwProton_recoMuMom_Cosmic = sSignalwProton_recoMuMom_Cosmic->ToTH1( pot, colorwheel_class[7] );
+  hSignalwProton_recoMuMom_Cosmic->SetFillColor(colorwheel_class[7]);
+  TH1* hSignalwProton_recoMuMom_Cosmic_InTime = sSignalwProton_recoMuMom_Cosmic_InTime->ToTH1( cosmicLivetime, colorwheel_class[8], kSolid, kLivetime );
+  hSignalwProton_recoMuMom_Cosmic_InTime->SetFillColor(colorwheel_class[8]);
+
   hAll_NoCut->Add(hInTime_NoCut);
   hAll_Selct->Add(hInTime_Selct);
 
@@ -1185,6 +1255,8 @@ void study ()
   hTzoom_All_CLECoh->Add(hTzoom_InTime_CLECoh);
 
   hAll_SelRes->Add(hInTime_SelRes);
+
+  hSignalwProton_recoMuMom_BaseSliceSel->Add(hSignalwProton_recoMuMom_Cosmic_InTime);
 
   double sigEff_NoCut = 1.;
   double sigEff_Selct = hSignal_Selct->Integral() / hSignal_NoCut->Integral();
@@ -2027,6 +2099,38 @@ void study ()
   hAll_SelRes->Draw("hist same");
   tLMode_SelRes->Draw();
   gPad->Print("Spectrum_Modes_RESStudy_SelRes.pdf");
+
+  // 1MuNP (sometimes called 1Mu1P in the vars...) broken into different classes to understand the background...
+  double totalCounts_1MuNP = hSignalwProton_recoMuMom_BaseSliceSel->Integral();
+  TLegend *tLMode_1MuNP = new TLegend(0.6,0.6,0.87,0.87);
+  tLMode_1MuNP->SetHeader("1MuNP where N!=1 with |p| > 400 MeV/c", "C");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_TrueSignal,"True Signal","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NumuMuWrong,"NumuCC but #mu not signal","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NumuPWrong,"NumuCC but p not signal","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NumuBothWrong,"NumuCC but both wrong","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NumuNonFidVol,"NumuCC but non fiducial","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NumuOther,"NumuCC Other","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_NuOther,"Nu Other","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_Cosmic,"In-spill Cosmic","f");
+  tLMode_1MuNP->AddEntry(hSignalwProton_recoMuMom_Cosmic_InTime,"In-time Cosmic","f");
+
+  THStack *hStackMode_1MuNP = new THStack("hStackMode_1MuNP", "");
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_TrueSignal);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NumuMuWrong);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NumuPWrong);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NumuBothWrong);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NumuNonFidVol);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NumuOther);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_NuOther);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_Cosmic);
+  hStackMode_1MuNP->Add(hSignalwProton_recoMuMom_Cosmic_InTime);
+
+  new TCanvas;
+  hSignalwProton_recoMuMom_BaseSliceSel->Draw("hist");
+  hStackMode_1MuNP->Draw("hist same");
+  hSignalwProton_recoMuMom_BaseSliceSel->Draw("hist same");
+  tLMode_1MuNP->Draw();
+  gPad->Print("Spectrum_1Mu1PSelection.pdf");
 
   std::cout << "" << std::endl;
   std::cout << "Done." << std::endl;

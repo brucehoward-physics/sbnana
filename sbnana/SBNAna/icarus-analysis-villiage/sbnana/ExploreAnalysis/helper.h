@@ -150,6 +150,9 @@ int colorwheel[5] = {kBlue, kGreen+2, kRed, kMagenta, kViolet-1};
 // order: QE, MEC, RES, DIS, COH, NonSigCC
 int colorwheel_mode[6] = {kBlue, kCyan+1, kGreen+2, kOrange+1, kGreen, kGray+2};
 
+// order: true signal, numu mu wrong, numu p wrong, numu both wrong, numu non fid, numu other, nu other, cosmic, cosmic in-time
+int colorwheel_class[9] = {kBlue, kAzure+7, kRed, kGray+2, kGreen+2, kGreen, kOrange+2, kMagenta, kViolet-1 };
+
 /////////////////////////////////////////////////
 // Binning
 /////////////////////////////////////////////////
@@ -290,14 +293,14 @@ const Cut kCutTrueSigContained([](const caf::SRSliceProxy* slc)
 
 const Cut kCutNuCCButNotSigAll([](const caf::SRSliceProxy* slc)
                       {
-			if(slc->truth.index < 0) return false;
+                        if(slc->truth.index < 0) return false;
 
-			bool isSignal = (abs(slc->truth.pdg) == 14 &&
-					 slc->truth.iscc &&
-					 !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
-					 isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                        bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                            slc->truth.iscc &&
+                            !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                            isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
 
-			return ( slc->truth.iscc && !isSignal );
+                        return ( slc->truth.iscc && !isSignal );
                       });
 
 const Cut kCutNuCCButNotSigContained([](const caf::SRSliceProxy* slc)
@@ -373,11 +376,211 @@ const Cut kCutTrueSigELS([](const caf::SRSliceProxy* slc)
                            if( !kCutTrueSig(slc) ) return false;
 
                            return !( (slc->truth.genie_mode==caf::kQE && slc->truth.genie_inttype==caf::kCCQE) ||
-				     slc->truth.genie_mode==caf::kMEC ||
-				     slc->truth.genie_mode==caf::kRes ||
-				     slc->truth.genie_mode==caf::kDIS ||
-				     slc->truth.genie_mode==caf::kCoh );
+                                      slc->truth.genie_mode==caf::kMEC ||
+                                      slc->truth.genie_mode==caf::kRes ||
+                                      slc->truth.genie_mode==caf::kDIS ||
+                                      slc->truth.genie_mode==caf::kCoh );
                          });
+
+// --> What non signal selections should I look at?
+// ----> NumuCC Muon is < 50cm (contained) or 100cm (uncontained) but reco as >
+// ----> NumuCC Proton is contained (reco & true) but P < 400 MeV/c in truth, or Proton is uncontained but reco as contained --> grouping together as "w/o proton"
+// ----> NumuCC non-fiducial
+// ----> NumuCC other
+// ----> Nu other? (e.g. NC with a charged pi)
+// ----> Cosmics
+
+// Do these with slice cuts on the slice truth (as above)
+const Cut k1Mu1P_TrueSigTopology([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                                             slc->truth.iscc &&
+                                             !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                                             isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                            if ( !isSignal ) return false;
+
+                            // Check muon length and proton momentum
+                            bool signalLepton = false;
+                            bool signalHadron = false;
+
+                            for ( auto const& prim : slc->truth.prim ) {
+                              if ( signalLepton && signalHadron ) break;
+                              if ( prim.pdg == 13 && prim.length > 100. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 13 && prim.length > 50. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 2212 && !signalHadron ) {
+                                if ( !prim.contained ) continue;
+                                float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+                                if ( p > 0.4 )
+                                  signalHadron = true;
+                                continue;
+                              }
+                            }
+
+                            if ( !signalLepton || !signalHadron ) return false;
+                            return true;
+                          });
+
+const Cut k1Mu1P_SliceIsNumuCC_MuLengthWrong([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                                             slc->truth.iscc &&
+                                             !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                                             isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                            if ( !isSignal ) return false;
+
+                            // Check muon length and proton momentum
+                            bool signalLepton = false;
+                            bool signalHadron = false;
+
+                            for ( auto const& prim : slc->truth.prim ) {
+                              if ( signalLepton && signalHadron ) break;
+                              if ( prim.pdg == 13 && prim.length > 100. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 13 && prim.length > 50. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 2212 && !signalHadron ) {
+                                if ( !prim.contained ) continue;
+                                float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+                                if ( p > 0.4 )
+                                  signalHadron = true;
+                                continue;
+                              }
+                            }
+
+                            if ( !signalLepton && signalHadron ) return true;
+                            return false;
+                          });
+
+const Cut k1Mu1P_SliceIsNumuCC_PWrong([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                                             slc->truth.iscc &&
+                                             !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                                             isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                            if ( !isSignal ) return false;
+
+                            // Check muon length and proton momentum
+                            bool signalLepton = false;
+                            bool signalHadron = false;
+
+                            for ( auto const& prim : slc->truth.prim ) {
+                              if ( signalLepton && signalHadron ) break;
+                              if ( prim.pdg == 13 && prim.length > 100. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 13 && prim.length > 50. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 2212 && !signalHadron ) {
+                                if ( !prim.contained ) continue;
+                                float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+                                if ( p > 0.4 )
+                                  signalHadron = true;
+                                continue;
+                              }
+                            }
+
+                            if ( signalLepton && !signalHadron ) return true;
+                            return false;
+                          });
+
+const Cut k1Mu1P_SliceIsNumuCC_BothWrong([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                                             slc->truth.iscc &&
+                                             !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                                             isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                            if ( !isSignal ) return false;
+
+                            // Check muon length and proton momentum
+                            bool signalLepton = false;
+                            bool signalHadron = false;
+
+                            for ( auto const& prim : slc->truth.prim ) {
+                              if ( signalLepton && signalHadron ) break;
+                              if ( prim.pdg == 13 && prim.length > 100. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 13 && prim.length > 50. && !signalLepton ) {
+                                signalLepton = true;
+                                continue;
+                              }
+                              else if ( prim.pdg == 2212 && !signalHadron ) {
+                                if ( !prim.contained ) continue;
+                                float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+                                if ( p > 0.4 )
+                                  signalHadron = true;
+                                continue;
+                              }
+                            }
+
+                            if ( !signalLepton && !signalHadron ) return true;
+                            return false;
+                          });
+
+const Cut k1Mu1P_SliceIsNumuCC_NonFiducial([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 &&
+                                             slc->truth.iscc &&
+                                             !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                                             !isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+                            if ( !isSignal ) return false;
+
+                            return true;
+                          });
+
+const Cut k1Mu1P_SliceIsNumuCC_GENERAL_FOR_OTHER([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            bool isSignal = (abs(slc->truth.pdg) == 14 && slc->truth.iscc);
+                            if ( !isSignal ) return false;
+
+                            return true;
+                          });
+const Cut k1Mu1P_SliceIsNumuCC_Other = k1Mu1P_SliceIsNumuCC_GENERAL_FOR_OTHER && 
+                                       !k1Mu1P_SliceIsNumuCC_NonFiducial &&
+                                       !k1Mu1P_SliceIsNumuCC_BothWrong &&
+                                       !k1Mu1P_SliceIsNumuCC_PWrong &&
+                                       !k1Mu1P_SliceIsNumuCC_MuLengthWrong &&
+                                       !k1Mu1P_TrueSigTopology;
+
+const Cut k1Mu1P_SliceIsNuOther([](const caf::SRSliceProxy* slc)
+                          {
+                            if(slc->truth.index < 0) return false;
+
+                            if (abs(slc->truth.pdg) == 14 && slc->truth.iscc) return false;
+                            return true;
+                          });
+
+const Cut k1Mu1P_SliceIsCosmic([](const caf::SRSliceProxy* slc)
+                          {
+                            return slc->truth.index < 0;
+                          });
+
 
 // kCutTrueSig && Final State?
 
@@ -1300,6 +1503,9 @@ const Cut kNuMISelection = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDi
 const Cut kNuMISelectionContained = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew && kProtonTrack && kRecoMuonContained );
 const Cut kNuMISelection_TrueSignal = kCutTrueSig && kNuMISelection;
 
+// 1Mu1P (well really 1MuNP with a minimum P threshold) selection
+const Cut kNuMI1Mu1PSelection = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew && kProtonTrack400MeV );
+
 // Version without proton cut for investigation on the proton cut...
 const Cut kNuMISelectionWOProton = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew );
 
@@ -1571,7 +1777,7 @@ const Cut kGraysProposedSampleCut([](const caf::SRSliceProxy* slc) {
     if (slc->is_clear_cosmic) return false;
     if (slc->reco.trk.size() < 3) return false;
 
-    unsigned int nPrimTracks = 0;
+    unsigned int nPrimTracks = 1; // think after talking to Jaesung this needs to be 1 - we found this bug while comparing cuts
     bool oneIsProton = false;
 
     for ( auto const& trk : slc->reco.trk ) {
@@ -1603,7 +1809,7 @@ const Cut kGraysProposedSampleCutWithMuonTrack([](const caf::SRSliceProxy* slc) 
     if (slc->is_clear_cosmic) return false;
     if (slc->reco.trk.size() < 3) return false;
 
-    unsigned int nPrimTracks = 0;
+    unsigned int nPrimTracks = 1; // think after talking to Jaesung this needs to be 1 - we found this bug while comparing cuts
     bool oneIsProton = false;
 
     int idxMuon = kPTrackIndNew(slc);
@@ -1612,7 +1818,8 @@ const Cut kGraysProposedSampleCutWithMuonTrack([](const caf::SRSliceProxy* slc) 
     for ( unsigned int idxTrk = 0; idxTrk < slc->reco.trk.size(); ++idxTrk ) {
       if ( (int)idxTrk == idxMuon ) continue; // need a different track...
   
-      auto const& trk = slc->reco.trk.at(idxTrk);      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
+      auto const& trk = slc->reco.trk.at(idxTrk);
+      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
                                      slc->vertex.y - trk.start.y,
                                      slc->vertex.z - trk.start.z);
 
@@ -1768,6 +1975,7 @@ const SpillMultiVar kTrueSignalwProtonMuMom ( [](const caf::SRSpillProxy *sr) {
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
+          if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
@@ -1920,6 +2128,7 @@ const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
+          if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
@@ -1985,6 +2194,7 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
+          if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
           if ( p > 0.4 )
             signalHadron = true;
