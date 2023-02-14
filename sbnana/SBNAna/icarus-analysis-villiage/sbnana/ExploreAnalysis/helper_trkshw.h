@@ -1290,7 +1290,7 @@ const SpillMultiVar kTrueProtonsMomentum( [](const caf::SRSpillProxy *sr) {
       continue; // not signal
 
     for ( auto const& prim : nu.prim ) {
-      if ( prim.pdg == 2212 ){
+      if ( prim.pdg == 2212 && prim.contained ){
         g4ids.push_back( prim.G4ID );
         float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
         ps.push_back( p );
@@ -1315,7 +1315,7 @@ const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy
       continue; // not signal
 
     for ( auto const& prim : nu.prim ) {
-      if ( prim.pdg == 2212 ){
+      if ( prim.pdg == 2212 && prim.contained ){
         g4ids.push_back( prim.G4ID );
         float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
         g4idPs[prim.G4ID] = p;
@@ -1345,6 +1345,118 @@ const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy
   return ps;
 });
 
+// Not cheated reco -- applies track containment and chi2 cut...
+const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idPs;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 && prim.contained ){
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        g4idPs[prim.G4ID] = p;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ) g4idFound[ g4ids[i] ] = 0;
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& pfp : slc.reco.pfp ) {
+      if( pfp.trackScore < 0.5 ) continue;
+      auto const& trk = pfp.trk;
+      if( std::isnan(trk.start.x) || trk.bestplane == -1 ) continue;
+
+      // Check cuts
+      const bool Contained = ( !isnan(trk.end.x) &&
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+      if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
+      // See if it matches our proton G4ID
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idPs[g4id] );
+  }
+
+  return ps;
+});
+
+// This version does not require it to be track-like, just has a track fit.
+const SpillMultiVar kTrueProtonsMomentum_TrackOrShower( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idPs;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 && prim.contained ){
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        g4idPs[prim.G4ID] = p;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ) g4idFound[ g4ids[i] ] = 0;
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& pfp : slc.reco.pfp ) {
+      auto const& trk = pfp.trk;
+      if( std::isnan(trk.start.x) || trk.bestplane == -1 ) continue;
+
+      // Check cuts
+      const bool Contained = ( !isnan(trk.end.x) &&
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+      if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
+      // See if it matches our proton G4ID
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idPs[g4id] );
+  }
+
+  return ps;
+});
 
 
 

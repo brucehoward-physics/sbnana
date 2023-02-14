@@ -59,9 +59,9 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 
 // NU + COSMIC
 // BIGGER DATA SET
-const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
 // BNB
 // Small set
@@ -179,6 +179,7 @@ void study ()
     // -- momentum version
     Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
     Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
+    Spectrum sSignal_TrueProtonMom_RecoTrks_SpillMV       ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_Tracked, kNoSpillCut );
     // -- selection efficiency:
     Spectrum sSignal_TrueNuE_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
     Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );
@@ -479,6 +480,7 @@ void study ()
 
     sSignal_TrueProtonMom_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_SpillMV") );
     sSignal_TrueProtonMom_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_CheatedReco_SpillMV") );
+    sSignal_TrueProtonMom_RecoTrks_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_RecoTrks_SpillMV") );
 
     sSignal_TrueNuE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_SpillMV") );
     sSignal_TrueNuE_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_Selct_SpillMV") );
@@ -736,6 +738,7 @@ void study ()
 
   Spectrum *sSignal_TrueProtonMom_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_SpillMV").release();
   Spectrum *sSignal_TrueProtonMom_CheatedReco_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_CheatedReco_SpillMV").release();
+  Spectrum *sSignal_TrueProtonMom_RecoTrks_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_RecoTrks_SpillMV").release();
 
   Spectrum *sSignal_TrueNuE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_SpillMV").release();
   Spectrum *sSignal_TrueNuE_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_Selct_SpillMV").release();
@@ -1038,6 +1041,10 @@ void study ()
   TH1* hSignal_TrueProtonMom_CheatedReco_SpillMV = sSignal_TrueProtonMom_CheatedReco_SpillMV->ToTH1( pot, kRed );
   Ratio rsSignal_TrueProtonMom_SpillMV( *sSignal_TrueProtonMom_CheatedReco_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
   TH1* rSignal_TrueProtonMom_SpillMV = rsSignal_TrueProtonMom_SpillMV.ToTH1( kBlack );
+  // Version with reco tracks :: sSignal_TrueProtonMom_RecoTrks_SpillMV
+  TH1* hSignal_TrueProtonMom_RecoTrks_SpillMV = sSignal_TrueProtonMom_RecoTrks_SpillMV->ToTH1( pot, kGreen+2 );
+  Ratio rsSignal_TrueProtonMom_RecoTrks_SpillMV( *sSignal_TrueProtonMom_RecoTrks_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
+  TH1* rSignal_TrueProtonMom_RecoTrks_SpillMV = rsSignal_TrueProtonMom_RecoTrks_SpillMV.ToTH1( kGreen+2 );
 
   TH1* hSignal_TrueNuE_SpillMV = sSignal_TrueNuE_SpillMV->ToTH1( pot, kBlack );
   TH1* hSignal_TrueNuE_Selct_SpillMV = sSignal_TrueNuE_Selct_SpillMV->ToTH1( pot, kRed );
@@ -1597,14 +1604,17 @@ void study ()
   TLegend *tL_TrueProtonMom = new TLegend(0.6,0.6,0.87,0.87);
   tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_SpillMV, "True |p| distribution", "l" );
   tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_CheatedReco_SpillMV, "True |p| w reco match", "l" );
+  tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_RecoTrks_SpillMV, "True |p| w reco trk sel", "l" );
 
   hSignal_TrueProtonMom_SpillMV->Draw("hist");
   hSignal_TrueProtonMom_CheatedReco_SpillMV->Draw("hist same");
+  hSignal_TrueProtonMom_RecoTrks_SpillMV->Draw("hist same");
   tL_TrueProtonMom->Draw();
   gPad->Print("Spectrum_TrueProtonMom.pdf");
 
   new TCanvas;
   rSignal_TrueProtonMom_SpillMV->Draw("");
+  rSignal_TrueProtonMom_RecoTrks_SpillMV->Draw("same");
   gPad->Print("Spectrum_TrueProtonMom_CheatedRecoEff.pdf");
 
   // neutrino E
