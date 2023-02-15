@@ -1630,12 +1630,12 @@ const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr
 			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
       const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
       const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
-      // if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
-      const float pida = trk.chi2pid[trk.bestplane].pida;
-      if ( Contained && ( pida > 15 || ( Chi2Proton <= 100. && Chi2Muon >= 30. ) ) ) {
-        // See if it matches our proton G4ID
-        if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
-      }
+      if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
+      // const float pida = trk.chi2pid[trk.bestplane].pida;
+      //if ( Contained && ( pida > 15 || ( Chi2Proton <= 100. && Chi2Muon >= 30. ) ) ) {
+      // See if it matches our proton G4ID
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+      //}
     }
   }
 
@@ -2831,7 +2831,7 @@ const SpillVar kSingleMatchCosThNuMINotIsoch ([](const caf::SRSpillProxy* sr) ->
                                                       ipart.end.z-ipart.start.z);
                                          dir = dir.Unit();
                                          double thXZ = (180./TMath::Pi())*TMath::ATan2(dir.X(),dir.Z());
-                                         if ( fabs(thXZ) <= 5. ) continue; // very approximate
+                                         if ( fabs(thXZ) <= 10. ) continue; // very approximate
                                          thNuMI = dir.Angle(NuDirection_NuMI);
                                        }
                                      }
@@ -2841,6 +2841,7 @@ const SpillVar kSingleMatchCosThNuMINotIsoch ([](const caf::SRSpillProxy* sr) ->
                                    return TMath::Cos(thNuMI);
                                  });
 
+// TODO: NEEDS FIX -- I think here I want like >= 75 and <= 105 or something like this?
 const SpillVar kSingleMatchCosThNuMINotIsochNotPerp ([](const caf::SRSpillProxy* sr) -> double
                                  {
                                    double thNuMI = 0.;
@@ -2870,8 +2871,8 @@ const SpillVar kSingleMatchCosThNuMINotIsochNotPerp ([](const caf::SRSpillProxy*
                                                       ipart.end.z-ipart.start.z);
                                          dir = dir.Unit();
                                          double thXZ = (180./TMath::Pi())*TMath::ATan2(dir.X(),dir.Z());
-                                         if ( fabs(thXZ) <= 5. ) continue; // very approximate
-                                         if ( fabs(thXZ) >= 60. ) continue; // very approximate
+                                         if ( fabs(thXZ) <= 10. ) continue; // very approximate
+                                         if ( fabs(thXZ) >= 75. ) continue; // very approximate
                                          thNuMI = dir.Angle(NuDirection_NuMI);
                                        }
                                      }

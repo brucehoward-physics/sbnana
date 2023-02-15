@@ -44,6 +44,7 @@
 #include "TLegend.h"
 #include "THStack.h"
 #include "TRandom3.h"
+#include "TStyle.h"
 
 // C++
 #include <vector>
@@ -60,9 +61,9 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 
 // NU + COSMIC
 // BIGGER DATA SET
-//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
 // BNB
 // Small set
@@ -81,7 +82,7 @@ const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/m
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2]*/flat*.root";
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*1*/flat*.root";
 
-const bool fRun = true; //false; //true;
+const bool fRun = false; //false; //true;
 
 void study ()
 {
@@ -683,6 +684,8 @@ void study ()
     fSpec->Close();
   }
 
+  gStyle->SetPalette(kBird);
+
   // HISTOGRAMS
   ////////////////////
   std::string fLoad = "spectra.root";
@@ -1128,7 +1131,7 @@ void study ()
   TH1* hNuMIMuons_CosThXZ = sNuMIMuons_CosThXZ->ToTH1( pot, kBlack );
   TH1* hNuMIMuons_CosThNuMI = sNuMIMuons_CosThNuMI->ToTH1( pot, kBlack );
   TH1* hNuMIMuons_CosThNuMINotIsoch = sNuMIMuons_CosThNuMINotIsoch->ToTH1( pot, kRed );
-  TH1* hNuMIMuons_CosThNuMINotIsochNotPerp = sNuMIMuons_CosThNuMINotIsoch->ToTH1( pot, kGreen+2 );
+  TH1* hNuMIMuons_CosThNuMINotIsochNotPerp = sNuMIMuons_CosThNuMINotIsochNotPerp->ToTH1( pot, kGreen+2 );
 
 
   TH1* hSignalQEL_Selct = sSignalQEL_Selct->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct->SetFillColor(colorwheel_mode[0]);
@@ -1728,7 +1731,7 @@ void study ()
   new TCanvas;
   hNuMIMuons_CosThNuMI->Draw("hist");
   hNuMIMuons_CosThNuMINotIsoch->Draw("hist same");
-  hNuMIMuons_CosThNuMINotIsochNotPerp->Draw("hist same");
+  // hNuMIMuons_CosThNuMINotIsochNotPerp->Draw("hist same");
   gPad->Print("Spectrum_MuFromNu_CosThNuMI.pdf");
 
   // L and L/E
