@@ -1277,10 +1277,30 @@ const SpillMultiVar kTrueProtonsKineticEnergy_RES_CheatedReco( [](const caf::SRS
   return protonKEs;
 });
 
+// BH -- SO, I think Gray's sample may be susceptible to the Pandora bug where sometimes 
+//       nu candidate slices won't be returned by the reconstruction and fed through to
+//       the CAFs. As a temporary fix, let's skip true protons (and reco trks) when there
+//       are no nu slices on that cryostat...
+
 // Same but with momentum not kinetic energy
 const SpillMultiVar kTrueProtonsMomentum( [](const caf::SRSpillProxy *sr) {
   std::vector<int> g4ids;
   std::vector<double> ps;
+
+  bool maskCryo0 = false;
+  bool maskCryo1 = false;
+  // TO TURN OFF THIS TEMPORARY HACK, COMMENT OUT THIS BIT...
+  /*
+  maskCryo0 = true;
+  maskCryo1 = true;
+  for ( auto const& slc : sr->slc ) {
+    if ( !maskCryo0 && !maskCryo1 ) break;
+    if ( slc.is_clear_cosmic ) continue;
+    if ( !std::isnan(slc.vertex.x) && slc.vertex.x < 0. ) maskCryo0 = false;
+    else if ( !std::isnan(slc.vertex.x) && slc.vertex.x > 0. ) maskCryo1 = false;
+  }
+  */
+  // --------------------------------------------------------
 
   for ( auto const& nu : sr->mc.nu ) {
     if ( abs(nu.pdg) != 14 ||
@@ -1288,6 +1308,9 @@ const SpillMultiVar kTrueProtonsMomentum( [](const caf::SRSpillProxy *sr) {
 				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
 				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
       continue; // not signal
+
+    if ( maskCryo0 && nu.position.x < 0 ) continue;
+    if ( maskCryo1 && nu.position.x > 0 ) continue;
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
@@ -1307,12 +1330,30 @@ const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy
   std::vector<int> g4ids;
   std::map<int, double> g4idPs;
 
+  bool maskCryo0 = false;
+  bool maskCryo1 = false;
+  // TO TURN OFF THIS TEMPORARY HACK, COMMENT OUT THIS BIT...
+  /*
+  maskCryo0 = true;
+  maskCryo1 = true;
+  for ( auto const& slc : sr->slc ) {
+    if ( !maskCryo0 && !maskCryo1 ) break;
+    if ( slc.is_clear_cosmic ) continue;
+    if ( !std::isnan(slc.vertex.x) && slc.vertex.x < 0. ) maskCryo0 = false;
+    else if ( !std::isnan(slc.vertex.x) && slc.vertex.x > 0. ) maskCryo1 = false;
+  }
+  */
+  // --------------------------------------------------------
+
   for ( auto const& nu : sr->mc.nu ) {
     if ( abs(nu.pdg) != 14 ||
 				 !nu.iscc ||
 				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
 				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
       continue; // not signal
+
+    if ( maskCryo0 && nu.position.x < 0 ) continue;
+    if ( maskCryo1 && nu.position.x > 0 ) continue;
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
@@ -1352,12 +1393,30 @@ const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr
   std::vector<int> g4ids;
   std::map<int, double> g4idPs;
 
+  bool maskCryo0 = false;
+  bool maskCryo1 = false;
+  // TO TURN OFF THIS TEMPORARY HACK, COMMENT OUT THIS BIT...
+  /*
+  maskCryo0 = true;
+  maskCryo1 = true;
+  for ( auto const& slc : sr->slc ) {
+    if ( !maskCryo0 && !maskCryo1 ) break;
+    if ( slc.is_clear_cosmic ) continue;
+    if ( !std::isnan(slc.vertex.x) && slc.vertex.x < 0. ) maskCryo0 = false;
+    else if ( !std::isnan(slc.vertex.x) && slc.vertex.x > 0. ) maskCryo1 = false;
+  }
+  */
+  // --------------------------------------------------------
+
   for ( auto const& nu : sr->mc.nu ) {
     if ( abs(nu.pdg) != 14 ||
 				 !nu.iscc ||
 				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
 				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
       continue; // not signal
+
+    if ( maskCryo0 && nu.position.x < 0 ) continue;
+    if ( maskCryo1 && nu.position.x > 0 ) continue;
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
@@ -1409,12 +1468,30 @@ const SpillMultiVar kTrueProtonsMomentum_TrackOrShower( [](const caf::SRSpillPro
   std::vector<int> g4ids;
   std::map<int, double> g4idPs;
 
+  bool maskCryo0 = false;
+  bool maskCryo1 = false;
+  // TO TURN OFF THIS TEMPORARY HACK, COMMENT OUT THIS BIT...
+  /*
+  maskCryo0 = true;
+  maskCryo1 = true;
+  for ( auto const& slc : sr->slc ) {
+    if ( !maskCryo0 && !maskCryo1 ) break;
+    if ( slc.is_clear_cosmic ) continue;
+    if ( !std::isnan(slc.vertex.x) && slc.vertex.x < 0. ) maskCryo0 = false;
+    else if ( !std::isnan(slc.vertex.x) && slc.vertex.x > 0. ) maskCryo1 = false;
+  }
+  */
+  // --------------------------------------------------------
+
   for ( auto const& nu : sr->mc.nu ) {
     if ( abs(nu.pdg) != 14 ||
 				 !nu.iscc ||
 				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
 				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
       continue; // not signal
+
+    if ( maskCryo0 && nu.position.x < 0 ) continue;
+    if ( maskCryo1 && nu.position.x > 0 ) continue;
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){

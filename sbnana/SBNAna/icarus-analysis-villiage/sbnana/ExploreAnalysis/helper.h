@@ -172,11 +172,14 @@ const Binning kBinsT = Binning::Simple(30,0,1.5); // |t| bins
 const Binning kBinsTzoom = Binning::Simple(20,0,.2);
 
 const Binning kBinsPID = Binning::Simple(30,0,150);
+const Binning kBinsPIDA = Binning::Simple(25,0,50);
 
 const Binning kBinsL = Binning::Simple(50,0.,1000.);
 const Binning kBinsLE = Binning::Simple(40,0.,4.);
 
 const Binning kBinsCosTh = Binning::Simple(10,-1.,1.);
+
+const Binning kBinsRTLen = Binning::Simple(31,-0.05,3.05);
 
 const Binning kBinsP_Custom = Binning::Custom({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 2.5, 3.5});
 
@@ -870,6 +873,47 @@ const Var kRecoProtonChi2MuSimple([](const caf::SRSliceProxy* slc) -> float {
     return chi2muon;
   });
 
+// PIDA
+
+const Var kRecoProtonPIDASimple([](const caf::SRSliceProxy* slc) -> float {
+    float chi2proton(-5.f);
+
+    if ( kPTrackIndNewProtonSimple(slc) >= 0 )
+    {
+      auto const& trk = slc->reco.trk.at(kPTrackIndNewProtonSimple(slc));
+      const bool Contained = ( !isnan(trk.end.x) &&
+			       ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+				      (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			       !isnan(trk.end.y) &&
+			       ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			       !isnan(trk.end.z) &&
+			       ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+      if(Contained) chi2proton = trk.chi2pid[trk.bestplane].pida;
+    }
+
+    return chi2proton;
+  });
+
+const Var kRecoMuonPIDA([](const caf::SRSliceProxy* slc) -> float {
+    float chi2muon(-5.f);
+
+    if ( kPTrackIndNew(slc) >= 0 )
+    {
+      auto const& trk = slc->reco.trk.at(kPTrackIndNew(slc));
+      const bool Contained = ( !isnan(trk.end.x) &&
+			       ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+				      (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			       !isnan(trk.end.y) &&
+			       ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			       !isnan(trk.end.z) &&
+			       ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+      if(Contained) chi2muon = trk.chi2pid[trk.bestplane].pida;
+    }
+
+    return chi2muon;
+  });
+
+
 // Is selected proton (kPTrackIndNewProton) actually a proton
 const Cut kRecoProtonIsTrueProton([](const caf::SRSliceProxy* slc) {
     if ( kPTrackIndNewProton(slc) >= 0 )
@@ -1289,6 +1333,16 @@ const SpillMultiVar kTrueProtonsMomentum( [](const caf::SRSpillProxy *sr) {
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
         g4ids.push_back( prim.G4ID );
         float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
         ps.push_back( p );
@@ -1314,6 +1368,16 @@ const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
         g4ids.push_back( prim.G4ID );
         float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
         g4idPs[prim.G4ID] = p;
@@ -1342,6 +1406,56 @@ const SpillMultiVar kTrueProtonsMomentum_CheatedReco( [](const caf::SRSpillProxy
   return ps;
 });
 
+const SpillMultiVar kTrueProtonsMomentum_CheatedRecoTrk( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idPs;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        g4idPs[prim.G4ID] = p;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ) g4idFound[ g4ids[i] ] = 0;
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& trk : slc.reco.trk ) {
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idPs[g4id] );
+  }
+
+  return ps;
+});
+
 // Not cheated reco -- applies track containment and chi2 cut...
 const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr) {
   std::vector<double> ps;
@@ -1358,6 +1472,16 @@ const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr
 
     for ( auto const& prim : nu.prim ) {
       if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
         g4ids.push_back( prim.G4ID );
         float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
         g4idPs[prim.G4ID] = p;
@@ -1383,9 +1507,12 @@ const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr
 			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
       const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
       const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
-      if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
-      // See if it matches our proton G4ID
-      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+      // if ( !Contained || Chi2Proton > 100. || Chi2Muon < 30. ) continue;
+      const float pida = trk.chi2pid[trk.bestplane].pida;
+      if ( Contained && ( pida > 15 || ( Chi2Proton <= 100. && Chi2Muon >= 30. ) ) ) {
+        // See if it matches our proton G4ID
+        if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ) g4idFound[trk.truth.p.G4ID]+=1;
+      }
     }
   }
 
@@ -1395,6 +1522,123 @@ const SpillMultiVar kTrueProtonsMomentum_Tracked( [](const caf::SRSpillProxy *sr
 
   return ps;
 });
+
+const SpillMultiVar kTrueProtonsRTLen_CheatedRecoTrk( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idLens;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
+        g4ids.push_back( prim.G4ID );
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        g4idLens[prim.G4ID] = prim.length;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  std::map< int, float > g4idSelTrkLen;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ){
+    g4idFound[ g4ids[i] ] = 0;
+    g4idSelTrkLen[ g4ids[i] ] = 0.;
+  }
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& trk : slc.reco.trk ) {
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ){
+        g4idFound[trk.truth.p.G4ID]+=1;
+        if ( trk.len > g4idSelTrkLen[ trk.truth.p.G4ID ] ) g4idSelTrkLen[ trk.truth.p.G4ID ] = trk.len;
+      }
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idSelTrkLen[g4id] / g4idLens[g4id] );
+  }
+
+  return ps;
+});
+
+const SpillMultiVar kTrueProtonsRTLen_CheatedRecoTrk_HighE( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> ps;
+
+  std::vector<int> g4ids;
+  std::map<int, double> g4idLens;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( abs(nu.pdg) != 14 ||
+				 !nu.iscc ||
+				 std::isnan(nu.position.x) || std::isnan(nu.position.y) || std::isnan(nu.position.z) ||
+				 !isInFV(nu.position.x,nu.position.y,nu.position.z) )
+      continue; // not signal
+
+    for ( auto const& prim : nu.prim ) {
+      if ( prim.pdg == 2212 && prim.contained ){
+        // What if we define containment with 10cm like in reco?
+        const bool TContained = (!isnan(prim.end.x) &&
+                                 ((prim.end.x < -61.94 - 10 && prim.end.x > -358.49 + 10) ||
+                                  (prim.end.x >  61.94 + 10 && prim.end.x <  358.49 - 10)) &&
+                                 !isnan(prim.end.y) &&
+                                 ( prim.end.y > -181.86 + 10 && prim.end.y < 134.96 - 10 ) &&
+                                 !isnan(prim.end.z) &&
+                                 ( prim.end.z > -894.95 + 10 && prim.end.z < 894.95 - 10 ) );
+        if ( !TContained ) continue;
+        // -----------------------------------------------------
+        float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
+        if ( p < 1.0 ) continue; // minimum |p| = 1 GeV/c here...
+        g4ids.push_back( prim.G4ID );
+        g4idLens[prim.G4ID] = prim.length;
+      }
+    }
+  }
+
+  if ( g4ids.size() == 0 ) return ps;
+
+  std::map< int, unsigned int > g4idFound;
+  std::map< int, float > g4idSelTrkLen;
+  for ( unsigned int i=0; i<g4ids.size(); ++i ){
+    g4idFound[ g4ids[i] ] = 0;
+    g4idSelTrkLen[ g4ids[i] ] = 0.;
+  }
+
+  for ( auto const& slc : sr->slc ) {
+    for ( auto const& trk : slc.reco.trk ) {
+      if ( g4idFound.find( trk.truth.p.G4ID ) != g4idFound.end() ){
+        g4idFound[trk.truth.p.G4ID]+=1;
+        if ( trk.len > g4idSelTrkLen[ trk.truth.p.G4ID ] ) g4idSelTrkLen[ trk.truth.p.G4ID ] = trk.len;
+      }
+    }
+  }
+
+  for ( auto const &[g4id, counts] : g4idFound ) {
+    if ( counts > 0 ) ps.push_back( g4idSelTrkLen[g4id] / g4idLens[g4id] );
+  }
+
+  return ps;
+});
+
+
 
 
 

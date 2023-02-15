@@ -141,6 +141,11 @@ void study ()
 
     Spectrum sSignal_TruPSimple_Selct_Chi2P( "Chi2 PID Proton", kBinsPID, loader, kRecoProtonChi2PSimple, kNoSpillCut, kCutTrueSig && kRecoProtonIsTrueProtonSimple && kNuMISelectionWOProton );
     Spectrum sSignal_TruPSimple_Selct_Chi2Mu( "Chi2 PID Muon", kBinsPID, loader, kRecoProtonChi2MuSimple, kNoSpillCut, kCutTrueSig && kRecoProtonIsTrueProtonSimple && kNuMISelectionWOProton );
+
+    // Testing the PID A values
+    Spectrum sSignal_TruPSimple_Selct_PIDA( "PIDA", kBinsPIDA, loader, kRecoProtonPIDASimple, kNoSpillCut, kCutTrueSig && kRecoProtonIsTrueProtonSimple && kNuMISelectionWOProton );
+    Spectrum sSignal_RecoMu_Selct_PIDA( "PIDA", kBinsPIDA, loader, kRecoMuonPIDA, kNoSpillCut, kCutTrueSig && kNuMISelection );
+
     // stopping version:
     Spectrum sSignal_TruStopPSimple_Selct_Chi2P( "Chi2 PID Proton", kBinsPID, loader, kRecoProtonChi2PSimple, kNoSpillCut, kCutTrueSig && kRecoProtonIsTrueStoppingProtonSimple && kNuMISelectionWOProton );
     Spectrum sSignal_TruStopPSimple_Selct_Chi2Mu( "Chi2 PID Muon", kBinsPID, loader, kRecoProtonChi2MuSimple, kNoSpillCut, kCutTrueSig && kRecoProtonIsTrueStoppingProtonSimple && kNuMISelectionWOProton );
@@ -179,7 +184,11 @@ void study ()
     // -- momentum version
     Spectrum sSignal_TrueProtonMom_SpillMV                ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum, kNoSpillCut );
     Spectrum sSignal_TrueProtonMom_CheatedReco_SpillMV    ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_CheatedReco, kNoSpillCut );
+    Spectrum sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_CheatedRecoTrk, kNoSpillCut );
     Spectrum sSignal_TrueProtonMom_RecoTrks_SpillMV       ( "Proton Momentum [GeV/c]", kBinsProtonPZoom, loader, kTrueProtonsMomentum_Tracked, kNoSpillCut );
+
+    Spectrum sSignal_TrueProtonRTLen_RecoTrks_SpillMV      ( "Reco/True track length", kBinsRTLen, loader, kTrueProtonsRTLen_CheatedRecoTrk, kNoSpillCut );
+    Spectrum sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV( "Reco/True track length", kBinsRTLen, loader, kTrueProtonsRTLen_CheatedRecoTrk_HighE, kNoSpillCut );
     // -- selection efficiency:
     Spectrum sSignal_TrueNuE_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnu, kNoSpillCut );
     Spectrum sSignal_TrueNuE_Selct_SpillMV ( "True #nu Energy [GeV]", kBinsE, loader, kTrueSignalEnuSelected, kNoSpillCut );
@@ -453,7 +462,8 @@ void study ()
     sSignal_TruStopPSimple_Selct_Chi2P.SaveTo( fSpec->mkdir("sSignal_TruStopPSimple_Selct_Chi2P") );
     sSignal_TruStopPSimple_Selct_Chi2Mu.SaveTo( fSpec->mkdir("sSignal_TruStopPSimple_Selct_Chi2Mu") );
 
-
+    sSignal_TruPSimple_Selct_PIDA.SaveTo( fSpec->mkdir("sSignal_TruPSimple_Selct_PIDA") );
+    sSignal_RecoMu_Selct_PIDA.SaveTo( fSpec->mkdir("sSignal_RecoMu_Selct_PIDA") );
 
     sSignal_PMultPreFSI_NoCut.SaveTo( fSpec->mkdir("sSignal_PMultPreFSI_NoCut") );
     sSignal_PMultPostFSI_NoCut.SaveTo( fSpec->mkdir("sSignal_PMultPostFSI_NoCut") );
@@ -480,7 +490,11 @@ void study ()
 
     sSignal_TrueProtonMom_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_SpillMV") );
     sSignal_TrueProtonMom_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_CheatedReco_SpillMV") );
+    sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV") );
     sSignal_TrueProtonMom_RecoTrks_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonMom_RecoTrks_SpillMV") );
+
+    sSignal_TrueProtonRTLen_RecoTrks_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonRTLen_RecoTrks_SpillMV") );
+    sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV") );
 
     sSignal_TrueNuE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_SpillMV") );
     sSignal_TrueNuE_Selct_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueNuE_Selct_SpillMV") );
@@ -708,6 +722,8 @@ void study ()
   Spectrum *sSignal_TruStopPSimple_Selct_Chi2P = LoadFromFile<Spectrum>(fLoad, "sSignal_TruStopPSimple_Selct_Chi2P").release();
   Spectrum *sSignal_TruStopPSimple_Selct_Chi2Mu = LoadFromFile<Spectrum>(fLoad, "sSignal_TruStopPSimple_Selct_Chi2Mu").release();
 
+  Spectrum *sSignal_TruPSimple_Selct_PIDA = LoadFromFile<Spectrum>(fLoad, "sSignal_TruPSimple_Selct_PIDA").release();
+  Spectrum *sSignal_RecoMu_Selct_PIDA = LoadFromFile<Spectrum>(fLoad, "sSignal_RecoMu_Selct_PIDA").release();
 
 
   Spectrum *sSignal_PMultPreFSI_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal_PMultPreFSI_NoCut").release();
@@ -738,7 +754,11 @@ void study ()
 
   Spectrum *sSignal_TrueProtonMom_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_SpillMV").release();
   Spectrum *sSignal_TrueProtonMom_CheatedReco_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_CheatedReco_SpillMV").release();
+  Spectrum *sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV").release();
   Spectrum *sSignal_TrueProtonMom_RecoTrks_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonMom_RecoTrks_SpillMV").release();
+
+  Spectrum *sSignal_TrueProtonRTLen_RecoTrks_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonRTLen_RecoTrks_SpillMV").release();
+  Spectrum *sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV").release();
 
   Spectrum *sSignal_TrueNuE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_SpillMV").release();
   Spectrum *sSignal_TrueNuE_Selct_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueNuE_Selct_SpillMV").release();
@@ -989,7 +1009,8 @@ void study ()
   TH1* hSignal_TruStopPSimple_Selct_Chi2P = sSignal_TruStopPSimple_Selct_Chi2P->ToTH1( pot, kBlack );
   TH1* hSignal_TruStopPSimple_Selct_Chi2Mu = sSignal_TruStopPSimple_Selct_Chi2Mu->ToTH1( pot, kBlack );
 
-
+  TH1* hSignal_TruPSimple_Selct_PIDA = sSignal_TruPSimple_Selct_PIDA->ToTH1( pot, kBlack );
+  TH1* hSignal_RecoMu_Selct_PIDA = sSignal_RecoMu_Selct_PIDA->ToTH1( pot, kBlack );
 
   // Proton Multiplicity
   // PLOT 1 - Truth info
@@ -1041,10 +1062,17 @@ void study ()
   TH1* hSignal_TrueProtonMom_CheatedReco_SpillMV = sSignal_TrueProtonMom_CheatedReco_SpillMV->ToTH1( pot, kRed );
   Ratio rsSignal_TrueProtonMom_SpillMV( *sSignal_TrueProtonMom_CheatedReco_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
   TH1* rSignal_TrueProtonMom_SpillMV = rsSignal_TrueProtonMom_SpillMV.ToTH1( kBlack );
+  // Version with cheated reco but just tracks... ::  sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV
+  TH1* hSignal_TrueProtonMom_CheatedRecoTrk_SpillMV = sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV->ToTH1( pot, kOrange+2 );
+  Ratio rsSignal_TrueProtonMom_CheatedRecoTrk_SpillMV( *sSignal_TrueProtonMom_CheatedRecoTrk_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
+  TH1* rSignal_TrueProtonMom_CheatedRecoTrk_SpillMV = rsSignal_TrueProtonMom_CheatedRecoTrk_SpillMV.ToTH1( kOrange+2 );
   // Version with reco tracks :: sSignal_TrueProtonMom_RecoTrks_SpillMV
   TH1* hSignal_TrueProtonMom_RecoTrks_SpillMV = sSignal_TrueProtonMom_RecoTrks_SpillMV->ToTH1( pot, kGreen+2 );
   Ratio rsSignal_TrueProtonMom_RecoTrks_SpillMV( *sSignal_TrueProtonMom_RecoTrks_SpillMV, *sSignal_TrueProtonMom_SpillMV, true );
   TH1* rSignal_TrueProtonMom_RecoTrks_SpillMV = rsSignal_TrueProtonMom_RecoTrks_SpillMV.ToTH1( kGreen+2 );
+  // RTLen Plots
+  TH1* hSignal_TrueProtonRTLen_RecoTrks_SpillMV = sSignal_TrueProtonRTLen_RecoTrks_SpillMV->ToTH1( pot, kBlack );
+  TH1* hSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV = sSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV->ToTH1( pot, kRed );
 
   TH1* hSignal_TrueNuE_SpillMV = sSignal_TrueNuE_SpillMV->ToTH1( pot, kBlack );
   TH1* hSignal_TrueNuE_Selct_SpillMV = sSignal_TrueNuE_Selct_SpillMV->ToTH1( pot, kRed );
@@ -1490,6 +1518,14 @@ void study ()
   hSignal_TruStopPSimple_Selct_Chi2Mu->Draw("hist");
   gPad->Print("Spectrum_Selected_LeadingPCand_SIMPLE_Stopping_TruP_Chi2Mu.pdf");
 
+  // -- pida values
+  new TCanvas;
+  hSignal_RecoMu_Selct_PIDA->Scale( 1. / hSignal_RecoMu_Selct_PIDA->Integral() );
+  hSignal_RecoMu_Selct_PIDA->Draw("hist");
+  hSignal_TruPSimple_Selct_PIDA->SetLineColor(kRed);
+  hSignal_TruPSimple_Selct_PIDA->Scale( 1. / hSignal_TruPSimple_Selct_PIDA->Integral() );
+  hSignal_TruPSimple_Selct_PIDA->Draw("hist same");
+  gPad->Print("Spectrum_PIDA_MuonBlack_ProtonRed.pdf");
 
 
   // proton multiplicities
@@ -1604,18 +1640,34 @@ void study ()
   TLegend *tL_TrueProtonMom = new TLegend(0.6,0.6,0.87,0.87);
   tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_SpillMV, "True |p| distribution", "l" );
   tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_CheatedReco_SpillMV, "True |p| w reco match", "l" );
+  tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_CheatedRecoTrk_SpillMV, "True |p| w trk match", "l" );
   tL_TrueProtonMom->AddEntry( hSignal_TrueProtonMom_RecoTrks_SpillMV, "True |p| w reco trk sel", "l" );
 
   hSignal_TrueProtonMom_SpillMV->Draw("hist");
   hSignal_TrueProtonMom_CheatedReco_SpillMV->Draw("hist same");
+  hSignal_TrueProtonMom_CheatedRecoTrk_SpillMV->Draw("hist same");
   hSignal_TrueProtonMom_RecoTrks_SpillMV->Draw("hist same");
   tL_TrueProtonMom->Draw();
   gPad->Print("Spectrum_TrueProtonMom.pdf");
 
   new TCanvas;
   rSignal_TrueProtonMom_SpillMV->Draw("");
+  rSignal_TrueProtonMom_CheatedRecoTrk_SpillMV->Draw("same");
   rSignal_TrueProtonMom_RecoTrks_SpillMV->Draw("same");
   gPad->Print("Spectrum_TrueProtonMom_CheatedRecoEff.pdf");
+
+  // RTLen for protons
+  TLegend *tL_TrueProtonRTL = new TLegend(0.6,0.6,0.87,0.87);
+  tL_TrueProtonRTL->AddEntry( hSignal_TrueProtonRTLen_RecoTrks_SpillMV, "Longest trk best matched to p", "l" );
+  tL_TrueProtonRTL->AddEntry( hSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV, "with 1 GeV/c threshold", "l" );
+
+  hSignal_TrueProtonRTLen_RecoTrks_SpillMV->Scale( 1./hSignal_TrueProtonRTLen_RecoTrks_SpillMV->Integral() );
+  hSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV->Scale( 1./hSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV->Integral() );
+
+  new TCanvas;
+  hSignal_TrueProtonRTLen_RecoTrks_SpillMV->Draw("hist");
+  hSignal_TrueProtonRTLen_RecoTrks_HighE_SpillMV->Draw("hist same");
+  gPad->Print("Spectrum_TrueProtonRTLen_CheatedTrk.pdf");
 
   // neutrino E
   new TCanvas;
