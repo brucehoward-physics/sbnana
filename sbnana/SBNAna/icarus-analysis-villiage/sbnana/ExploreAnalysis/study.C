@@ -48,6 +48,7 @@
 // C++
 #include <vector>
 #include <string>
+#include <utility>
 
 #include "helper.h"
 
@@ -174,6 +175,18 @@ void study ()
     // -- cheated version
     Spectrum sSignal_PMultRecoCheated_NoCut ( "Reco Proton Mult.", kBinsCounts, loader, kProtonMult_Reco_Cheated, kNoSpillCut, kCutTrueSig );
     Spectrum sSignal_PMultRecoCheated_Selct ( "Reco Proton Mult.", kBinsCounts, loader, kProtonMult_Reco_Cheated, kNoSpillCut, kCutTrueSig && kNuMISelection );
+
+
+    // STUB PLOTS: Spectrum sComVsTXZ ("Var2D ComVsTXZ", Binning::Simple(75*80,0,75*80), loader, axComVsTXZ.GetMultiDVar(), kNoSpillCut);
+    const SpillHistAxis axProtonDQDxVsLen( {"Length [cm]","DQ/dx [e-/cm]"},
+                                           {kBinsStubLen,kBinsStubDQDx},
+                                           {kTrueProtonStubLen,kTrueProtonStubDQDx} );
+    const SpillHistAxis axNotPrtDQDxVsLen( {"Length [cm]","DQ/dx [e-/cm]"},
+                                           {kBinsStubLen,kBinsStubDQDx},
+                                           {kNotProtonStubLen,kNotProtonStubDQDx} );
+
+    Spectrum sTrueProtonStubDQDxVsLen ("Var2D Proton DQDxVsLen", Binning::Simple(10*16,0,10*16), loader, axProtonDQDxVsLen.GetMultiDVar(), kNoSpillCut);
+    Spectrum sNotProtonStubDQDxVsLen  ("Var2D NotPrt DQDxVsLen", Binning::Simple(10*16,0,10*16), loader, axNotPrtDQDxVsLen.GetMultiDVar(), kNoSpillCut);
 
 
     // -- multiplicity and cheated efficiency
@@ -483,6 +496,11 @@ void study ()
     sSignal_PMultRecoCheated_NoCut.SaveTo( fSpec->mkdir("sSignal_PMultRecoCheated_NoCut") );
     sSignal_PMultRecoCheated_Selct.SaveTo( fSpec->mkdir("sSignal_PMultRecoCheated_Selct") );
 
+
+    sTrueProtonStubDQDxVsLen.SaveTo( fSpec->mkdir("sTrueProtonStubDQDxVsLen") );
+    sNotProtonStubDQDxVsLen.SaveTo( fSpec->mkdir("sNotProtonStubDQDxVsLen") );
+
+
     sSignal_TrueProtonKE_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonKE_SpillMV") );
     sSignal_TrueProtonKE_RES_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonKE_RES_SpillMV") );
     sSignal_TrueProtonKE_CheatedReco_SpillMV.SaveTo( fSpec->mkdir("sSignal_TrueProtonKE_CheatedReco_SpillMV") );
@@ -746,6 +764,11 @@ void study ()
   Spectrum *sSignal_PMultPostFSIE100_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal_PMultPostFSIE100_Selct").release();
   Spectrum *sSignal_PMultRecoCheated_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal_PMultRecoCheated_NoCut").release();
   Spectrum *sSignal_PMultRecoCheated_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal_PMultRecoCheated_Selct").release();
+
+
+  Spectrum *sTrueProtonStubDQDxVsLen = LoadFromFile<Spectrum>(fLoad,"sTrueProtonStubDQDxVsLen").release();
+  Spectrum *sNotProtonStubDQDxVsLen  = LoadFromFile<Spectrum>(fLoad,"sNotProtonStubDQDxVsLen").release();
+
 
   Spectrum *sSignal_TrueProtonKE_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonKE_SpillMV").release();
   Spectrum *sSignal_TrueProtonKE_CheatedReco_SpillMV = LoadFromFile<Spectrum>(fLoad,"sSignal_TrueProtonKE_CheatedReco_SpillMV").release();
@@ -2193,6 +2216,26 @@ void study ()
   hSignalwProton_recoMuMom_BaseSliceSel->Draw("hist same");
   tLMode_1MuNP->Draw();
   gPad->Print("Spectrum_1Mu1PSelection.pdf");
+
+  // STUB PLOTS
+  // sTrueProtonStubDQDxVsLen, sNotProtonStubDQDxVsLen
+  new TCanvas;
+  std::unique_ptr<TH1> hOneTrueProtonStubDQDxVsLen(sTrueProtonStubDQDxVsLen->ToTH1(sTrueProtonStubDQDxVsLen->POT()));
+  TH2* hTrueProtonStubDQDxVsLen = ToTH2Helper(std::move(hOneTrueProtonStubDQDxVsLen),kBinsStubLen,kBinsStubDQDx);
+  hTrueProtonStubDQDxVsLen->SetTitle("");
+  hTrueProtonStubDQDxVsLen->Draw("colz");
+  hTrueProtonStubDQDxVsLen->GetXaxis()->SetTitle("stub length [cm]");
+  hTrueProtonStubDQDxVsLen->GetYaxis()->SetTitle("stub DQ/Dx [e-/cm]");
+  gPad->Print("hTrueProtonStubDQDxVsLen.pdf");
+
+  new TCanvas;
+  std::unique_ptr<TH1> hOneNotProtonStubDQDxVsLen(sNotProtonStubDQDxVsLen->ToTH1(sNotProtonStubDQDxVsLen->POT()));
+  TH2* hNotProtonStubDQDxVsLen = ToTH2Helper(std::move(hOneNotProtonStubDQDxVsLen),kBinsStubLen,kBinsStubDQDx);
+  hNotProtonStubDQDxVsLen->SetTitle("");
+  hNotProtonStubDQDxVsLen->Draw("colz");
+  hNotProtonStubDQDxVsLen->GetXaxis()->SetTitle("stub length [cm]");
+  hNotProtonStubDQDxVsLen->GetYaxis()->SetTitle("stub DQ/Dx [e-/cm]");
+  gPad->Print("hNotProtonStubDQDxVsLen.pdf");
 
   std::cout << "" << std::endl;
   std::cout << "Done." << std::endl;

@@ -181,6 +181,9 @@ const Binning kBinsCosTh = Binning::Simple(10,-1.,1.);
 
 const Binning kBinsRTLen = Binning::Simple(31,-0.05,3.05);
 
+const Binning kBinsStubLen = Binning::Simple(10,0.,5.);
+const Binning kBinsStubDQDx = Binning::Simple(16,0.,8.e5);
+
 const Binning kBinsP_Custom = Binning::Custom({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 2.5, 3.5});
 
 /////////////////////////////////////////////////\/////////////////////////////////////////////////
@@ -1122,13 +1125,14 @@ const Var kProtonMult_Reco_wStubs([](const caf::SRSliceProxy* slc) -> int {
 
       if ( Atslc < 10.0 && trk.pfp.parent_is_primary && Contained && Chi2Proton <= 100 && Chi2Muon >= 30 && angle >= -0.9 ) {
         countP += 1;
-	proton_pfpids.push_back( trk.pfp.id );
+	      proton_pfpids.push_back( trk.pfp.id );
       }
     }
 
+    int countPStub = 0;
     for ( unsigned int idxStub = 0; idxStub < slc->reco.stub.size(); ++idxStub ) {
       // Check if stub within 10cm of vertex, contained, and does NOT match one of our already
-      // selected proton PFParticles. We'll assume it's a proton if so?
+      // selected proton PFParticles.
 
       auto const& stub = slc->reco.stub.at(idxStub);
       const float Atslc = std::hypot(slc->vertex.x - stub.vtx.x,
@@ -1142,18 +1146,137 @@ const Var kProtonMult_Reco_wStubs([](const caf::SRSliceProxy* slc) -> int {
                                !isnan(stub.end.z) &&
                                ( stub.end.z > -894.95 + 10 && stub.end.z < 894.95 - 10 ) );
 
+      if ( Atslc >= 10.0 && !Contained ) continue;
+
+      // Gray makes the following 2d cut on proton ID for stubs:
+      // length <= 0.5cm , dQ/dx > 3.5e5 e/cm
+      // else: length <= 2cm, dQ/dx > 3e5 e/cm
+      // else: length <= 3cm, dQ/dx > 2.5e5 e/cm
+      const float stubLen = sqrt( std::pow(stub.end.x-stub.vtx.x,2) + std::pow(stub.end.y-stub.vtx.y,2) + std::pow(stub.end.z-stub.vtx.z,2) );
+      float stubDQ = 0.;
+      for ( auto const& plane : stub.planes ) {
+        if ( plane.p != 2 ) continue;
+        for ( auto const& hit : plane.hits ) stubDQ += hit.charge;
+      }
+      const float stubDQDx = stubDQ / stubLen;
+      if ( stubLen <= 0. ) continue;
+      bool passes2Dcut = false;
+      if ( stubLen <= 0.5 && stubDQDx > 3.5e5 ) passes2Dcut = true;
+      else if ( stubLen <= 2.0 && stubDQDx > 3.0e5 ) passes2Dcut = true;
+      else if ( stubLen <= 3.0 && stubDQDx > 2.5e5 ) passes2Dcut = true;
+      if ( !passes2Dcut ) continue;
+ 
+      // Now check if it matches an already identified proton PFP based on tracks
       bool matchesProtonPFP = false;
       if ( stub.pfpid >= 0 ) {
-	for ( auto const& pfpid : proton_pfpids ) {
-	  if ( pfpid == stub.pfpid ) matchesProtonPFP = true;
-	}
+        for ( auto const& pfpid : proton_pfpids ) {
+          if ( pfpid == stub.pfpid ) matchesProtonPFP = true;
+        }
       }
+      if ( matchesProtonPFP ) continue;
 
-      if ( Atslc < 10.0 && Contained && !matchesProtonPFP ) countP+=1;
+      // Gray said at the moment the simple selection/analysis of the stubs is not really trustworthy beyond 1 stub... how often would we pick a second?
+      countPStub += 1;
+      break;
     }
 
-    return countP;
+    //std::cout << "countP stub: " << countPStub << std::endl;
+
+    return countP + countPStub;
   });
+
+const SpillVar kTrueProtonStubDQDx( [](const caf::SRSpillProxy *sr) -> double {
+    double maxLen = -1.;
+    double maxLenDQDx = -1.;
+
+    for ( auto const& slc : sr->slc ) {
+      for ( auto const& stub : slc.reco.stub ) {
+        if ( stub.truth.p.pdg != 2212 ) continue;
+        float p = sqrt(std::pow( stub.truth.p.startp.x, 2 ) + std::pow( stub.truth.p.startp.y, 2 ) + std::pow( stub.truth.p.startp.z, 2 ));
+        if ( p > 0.3 ) continue;
+        const double stubLen = sqrt( std::pow(stub.end.x-stub.vtx.x,2) + std::pow(stub.end.y-stub.vtx.y,2) + std::pow(stub.end.z-stub.vtx.z,2) );
+        double stubDQ = 0.;
+        for ( auto const& plane : stub.planes ) {
+          if ( plane.p != 2 ) continue;
+          for ( auto const& hit : plane.hits ) stubDQ += hit.charge;
+        }
+        if ( stubDQ < std::numeric_limits<double>::epsilon() ||
+             stubLen < std::numeric_limits<double>::epsilon() ) continue;
+        const double dqdx = stubDQ / stubLen;
+        if ( stubLen > maxLen ) {
+          maxLen = stubLen;
+          maxLenDQDx = dqdx;
+        }
+      }
+    }
+
+    if ( maxLen < 0. ) return -5.;
+
+    return maxLenDQDx;
+  });
+
+const SpillVar kTrueProtonStubLen( [](const caf::SRSpillProxy *sr) -> double {
+    double maxLen = -1.;
+
+    for ( auto const& slc : sr->slc ) {
+      for ( auto const& stub : slc.reco.stub ) {
+        if ( stub.truth.p.pdg != 2212 ) continue;
+        float p = sqrt(std::pow( stub.truth.p.startp.x, 2 ) + std::pow( stub.truth.p.startp.y, 2 ) + std::pow( stub.truth.p.startp.z, 2 ));
+        if ( p > 0.3 ) continue;
+        const double stubLen = sqrt( std::pow(stub.end.x-stub.vtx.x,2) + std::pow(stub.end.y-stub.vtx.y,2) + std::pow(stub.end.z-stub.vtx.z,2) );
+        if ( stubLen > maxLen ) maxLen = stubLen;
+      }
+    }
+
+    if ( maxLen < 0. ) return -5.;
+
+    return maxLen;
+  });
+
+const SpillVar kNotProtonStubDQDx( [](const caf::SRSpillProxy *sr) -> double {
+    double maxLen = -1.;
+    double maxLenDQDx = -1.;
+
+    for ( auto const& slc : sr->slc ) {
+      for ( auto const& stub : slc.reco.stub ) {
+        if ( stub.truth.p.pdg == 2212 ) continue;
+        const double stubLen = sqrt( std::pow(stub.end.x-stub.vtx.x,2) + std::pow(stub.end.y-stub.vtx.y,2) + std::pow(stub.end.z-stub.vtx.z,2) );
+        double stubDQ = 0.;
+        for ( auto const& plane : stub.planes ) {
+          if ( plane.p != 2 ) continue;
+          for ( auto const& hit : plane.hits ) stubDQ += hit.charge;
+        }
+        if ( stubDQ < std::numeric_limits<double>::epsilon() ||
+             stubLen < std::numeric_limits<double>::epsilon() ) continue;
+        const double dqdx = stubDQ / stubLen;
+        if ( stubLen > maxLen ) {
+          maxLen = stubLen;
+          maxLenDQDx = dqdx;
+        }
+      }
+    }
+
+    if ( maxLen < 0. ) return -5.;
+
+    return maxLenDQDx;
+  });
+
+const SpillVar kNotProtonStubLen( [](const caf::SRSpillProxy *sr) -> double {
+    double maxLen = -1.;
+
+    for ( auto const& slc : sr->slc ) {
+      for ( auto const& stub : slc.reco.stub ) {
+        if ( stub.truth.p.pdg == 2212 ) continue;
+        const double stubLen = sqrt( std::pow(stub.end.x-stub.vtx.x,2) + std::pow(stub.end.y-stub.vtx.y,2) + std::pow(stub.end.z-stub.vtx.z,2) );
+        if ( stubLen > maxLen ) maxLen = stubLen;
+      }
+    }
+
+    if ( maxLen < 0. ) return -5.;
+
+    return maxLen;
+  });
+
 
 // cheated version with some reco
 const Var kProtonMult_Reco_Cheated([](const caf::SRSliceProxy* slc) -> int {
