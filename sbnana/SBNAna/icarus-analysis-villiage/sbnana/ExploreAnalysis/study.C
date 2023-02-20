@@ -65,6 +65,9 @@ const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_N
 // FROM JAESUNG
 //const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
+// NU + Cosmic ** Without ** the overburden
+//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2,3,4,5]*/flat*.root";
+
 // BNB
 // Small set
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/BNB_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*/*flat*.root";
@@ -74,6 +77,9 @@ const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_N
 // FROM JAESUNG
 const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*1*.root"; //"[0,1,2,3,4]*.root";
 
+// In-time cosmic ** Without ** the overburden
+//const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*/flat*.root";
+
 // Slim set
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2,3,4,5]*/flat*.root";
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*1*/flat*.root";
@@ -82,7 +88,7 @@ const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/m
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2]*/flat*.root";
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*1*/flat*.root";
 
-const bool fRun = false; //false; //true;
+const bool fRun = true; //false; //true;
 
 void study ()
 {
