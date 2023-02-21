@@ -2661,7 +2661,8 @@ const SpillMultiVar kAllwProtonRecoMuMomSelected ( [](const caf::SRSpillProxy *s
          kNotClearCosmic(&slc) &&
          kCutCRLongTrkDirY(&slc) &&
          kPTrackNew(&slc) &&
-         kProtonTrack400MeV(&slc) ) {
+         kProtonTrack400MeV(&slc) &&
+         kRecoMuonContained(&slc) ) {
       signalMuMom.push_back( kRecoMuonPNew(&slc) );
     }
   }
