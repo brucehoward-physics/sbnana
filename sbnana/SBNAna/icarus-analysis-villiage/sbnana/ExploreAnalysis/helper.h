@@ -2396,9 +2396,9 @@ const SpillMultiVar kTrueSignalwProtonMuMom ( [](const caf::SRSpillProxy *sr) {
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
-          if ( !prim.contained ) continue;
+          //if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          if ( p > 0.4 )
+          if ( p > 0.4 && p < 1.0 )
             signalHadron = true;
           continue;
         }
@@ -2549,9 +2549,9 @@ const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
-          if ( !prim.contained ) continue;
+          //if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          if ( p > 0.4 )
+          if ( p > 0.4 && p < 1.0 )
             signalHadron = true;
           continue;
         }
@@ -2575,7 +2575,8 @@ const SpillMultiVar kTrueSignalwProtonMuMomSelected ( [](const caf::SRSpillProxy
          kNotClearCosmic(&slc) &&
          kCutCRLongTrkDirY(&slc) &&
          kPTrackNew(&slc) &&
-         kProtonTrack400MeV(&slc) ) {
+         kProtonTrack400MeV(&slc) &&
+         kRecoMuonContained(&slc) ) {
       signalMuMom.push_back( signalIndexMuMom.at(slc.truth.index) );
       signalIndexMuMom.erase( slc.truth.index ); // should prevent duplicates
     }
@@ -2615,9 +2616,9 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
           continue;
         }
         else if ( prim.pdg == 2212 && !signalHadron ) {
-          if ( !prim.contained ) continue;
+          //if ( !prim.contained ) continue;
           float p = sqrt(std::pow( prim.startp.x, 2 ) + std::pow( prim.startp.y, 2 ) + std::pow( prim.startp.z, 2 ));
-          if ( p > 0.4 )
+          if ( p > 0.4 && p < 1.0 )
             signalHadron = true;
           continue;
         }
@@ -2641,7 +2642,8 @@ const SpillMultiVar kTrueSignalwProtonRecoMuMomSelected ( [](const caf::SRSpillP
          kNotClearCosmic(&slc) &&
          kCutCRLongTrkDirY(&slc) &&
          kPTrackNew(&slc) &&
-         kProtonTrack400MeV(&slc) ) {
+         kProtonTrack400MeV(&slc) &&
+         kRecoMuonContained(&slc) ) {
       signalMuMom.push_back( kRecoMuonPNew(&slc) );
       signalIndexMuMom.erase( slc.truth.index ); // should prevent duplicates
     }
