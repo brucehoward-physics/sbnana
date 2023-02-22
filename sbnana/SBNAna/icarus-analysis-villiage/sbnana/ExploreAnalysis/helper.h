@@ -184,6 +184,8 @@ const Binning kBinsRTLen = Binning::Simple(31,-0.05,3.05);
 const Binning kBinsStubLen = Binning::Simple(10,0.,5.);
 const Binning kBinsStubDQDx = Binning::Simple(16,0.,8.e5);
 
+const Binning kBinsPDGType = Binning::Simple(7,0,7);
+
 const Binning kBinsP_Custom = Binning::Custom({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 2.5, 3.5});
 
 /////////////////////////////////////////////////\/////////////////////////////////////////////////
@@ -387,6 +389,56 @@ const Cut kCutTrueSigELS([](const caf::SRSliceProxy* slc)
                                       slc->truth.genie_mode==caf::kDIS ||
                                       slc->truth.genie_mode==caf::kCoh );
                          });
+
+
+// 1 mu + >=1 p with 0 charged pi
+const Cut kCutSignal_1muNp0pi([](const caf::SRSliceProxy* slc)
+		      {
+      			if(slc->truth.index < 0) return false;
+
+      			bool signal = (abs(slc->truth.pdg) == 14 &&
+                           slc->truth.iscc &&
+                           !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                           isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+
+            if ( !signal ) return false;
+
+            unsigned int nMu(0), nP(0), nPi0(0), nChgPi(0);
+            for ( auto const& prim : slc->truth.prim ) {
+              if ( abs(prim.pdg) == 13 ) nMu+=1;
+              if ( abs(prim.pdg) == 2212 ) nP+=1;
+              if ( abs(prim.pdg) == 111 ) nPi0+=1;
+              if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+            }
+
+            return (nMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0);
+		      });
+
+const Cut kCutNuCC_Not_1muNp0pi([](const caf::SRSliceProxy* slc)
+		      {
+      			if(slc->truth.index < 0) return false;
+            if(!slc->truth.iscc ) return false;
+
+      			bool signal = (abs(slc->truth.pdg) == 14 &&
+                           slc->truth.iscc &&
+                           !std::isnan(slc->truth.position.x) && !std::isnan(slc->truth.position.y) && !std::isnan(slc->truth.position.z) &&
+                           isInFV(slc->truth.position.x,slc->truth.position.y,slc->truth.position.z));
+
+            unsigned int nMu(0), nP(0), nPi0(0), nChgPi(0);
+            for ( auto const& prim : slc->truth.prim ) {
+              if ( abs(prim.pdg) == 13 ) nMu+=1;
+              if ( abs(prim.pdg) == 2212 ) nP+=1;
+              if ( abs(prim.pdg) == 111 ) nPi0+=1;
+              if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+            }
+
+            bool topology = (nMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0);
+
+            if ( !signal || !topology ) return true;
+            return false;
+		      });
+
+
 
 // --> What non signal selections should I look at?
 // ----> NumuCC Muon is < 50cm (contained) or 100cm (uncontained) but reco as >
@@ -669,6 +721,24 @@ const Var kPTrackIndNew([](const caf::SRSliceProxy* slc) -> int {
     	  }
     }
     return PTrackInd;
+  });
+
+const Var kRecoMuonBestMatchPDG([](const caf::SRSliceProxy* slc) -> float {
+    float pdg(-1.f);
+
+    if ( kPTrackIndNew(slc) >= 0 )
+    {
+      auto const& trk = slc->reco.trk.at(kPTrackIndNew(slc));
+      if ( abs(trk.truth.p.pdg) == 11 )        pdg = 0.;
+      else if ( abs(trk.truth.p.pdg) == 13 )   pdg = 1.;
+      else if ( abs(trk.truth.p.pdg) == 22 )   pdg = 2.;
+      else if ( abs(trk.truth.p.pdg) == 111 )  pdg = 3.;
+      else if ( abs(trk.truth.p.pdg) == 211 )  pdg = 4.;
+      else if ( abs(trk.truth.p.pdg) == 2212 ) pdg = 5.;
+      else                                     pdg = 6.;
+    }
+
+    return pdg + std::numeric_limits<float>::epsilon();
   });
 
 const Var kRecoMuonPNew([](const caf::SRSliceProxy* slc) -> float {
@@ -2884,3 +2954,117 @@ const SpillVar kSingleMatchCosThNuMINotIsochNotPerp ([](const caf::SRSpillProxy*
                                    if ( g4id < 0 ) return -999;
                                    return TMath::Cos(thNuMI);
                                  });
+
+
+// Attempt to make a 0pion cut
+
+// First attempt bakes it into the Muon selection
+const Var kPTrackIndNew_0Pi([](const caf::SRSliceProxy* slc) -> int {
+    // The (dis)qualification of a slice is based upon the track level information.
+    float Longest(0);
+    int PTrackInd(-1);
+
+    unsigned int nCands(0);
+
+    for (std::size_t i(0); i < slc->reco.trk.size(); ++i)
+    {
+      auto const& trk = slc->reco.trk.at(i);
+      if(trk.bestplane == -1) continue;
+
+      // First we calculate the distance of each track to the slice vertex.
+      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
+                                      slc->vertex.y - trk.start.y,
+                                      slc->vertex.z - trk.start.z);
+
+      // We require that the distance of the track from the slice is less than
+      // 10 cm and that the parent of the track has been marked as the primary.
+      const bool AtSlice = ( Atslc < 10.0 && trk.pfp.parent_is_primary);
+
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+
+      const bool Contained = (!isnan(trk.end.x) &&
+                              ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+                                (trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+                              !isnan(trk.end.y) &&
+                              ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+                              !isnan(trk.end.z) &&
+                              ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+      const bool MaybeMuonExiting = ( !Contained && trk.len > 100);
+      const bool MaybeMuonContained = ( Contained && Chi2Proton > 60 && Chi2Muon < 30 && trk.len > 50 );
+      if ( AtSlice && ( MaybeMuonExiting || MaybeMuonContained ) )
+        nCands+=1;
+      if ( trk.len > Longest )
+      {
+        Longest = trk.len;
+        PTrackInd = i;
+      }
+    }
+
+    if ( nCands > 1 ) return -1;
+    return PTrackInd;
+  });
+
+  const Cut kPTrackNew_0Pi([](const caf::SRSliceProxy* slc) {
+    return ( kPTrackIndNew_0Pi(slc) >= 0 );
+  });
+
+// Second attempt:
+// -- No Appreciable shower
+// -- Any track that isn't our primary muon or proton needs to be consistent with a proton
+//     -- What if we require ONLY two tracks?
+
+const Cut kNoAppreciableShower_0Pi([](const caf::SRSliceProxy* slc) {
+    unsigned int appreciableShowers = 0;
+    for ( auto const& shw : slc->reco.shw ) 
+    {
+      const float Atslc = std::hypot(slc->vertex.x - shw.start.x,
+                                     slc->vertex.y - shw.start.y,
+                                     slc->vertex.z - shw.start.z);
+
+      if ( Atslc < 15. && shw.bestplane_energy > 0.030 ) appreciableShowers+=1;
+    }
+
+    if ( appreciableShowers == 0 ) return true;
+    return false;
+  });
+
+const Cut kNonMuonTracksAreProtons([](const caf::SRSliceProxy* slc) {
+    int primaryInd = kPTrackIndNew(slc);
+    if ( primaryInd < 0 ) return false;
+
+    unsigned int idxPrim = (unsigned int)primaryInd;
+
+    // Check to see if any of the non-muon candidates is inconsistent with a proton 
+    for ( unsigned int idxTrk = 0; idxTrk < slc->reco.trk.size(); ++idxTrk ) {
+      if ( idxTrk == idxPrim ) continue; // muon should be muon-like...
+
+      auto const& trk = slc->reco.trk.at(idxTrk);
+      if(trk.bestplane == -1) continue; // can't determine chi2 for this track... sigh.
+
+      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
+				                             slc->vertex.y - trk.start.y,
+				                             slc->vertex.z - trk.start.z);
+      const bool Contained = ( !isnan(trk.end.x) &&
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+
+      if ( Atslc >= 10.0 || !trk.pfp.parent_is_primary ) continue; // not a primary so we choose to move on
+
+      // Now check if it's actually proton like and return false if not...
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+      if ( Chi2Proton > 100. || Chi2Muon < 30. ) return false;
+    }
+
+    // All our primary tracks are proton-like, we're good!
+    return true;
+  });
+
+// const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew_0Pi && kProtonTrack );
+const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
+                                 kPTrackNew && kProtonTrack && kNoAppreciableShower_0Pi && kNonMuonTracksAreProtons );

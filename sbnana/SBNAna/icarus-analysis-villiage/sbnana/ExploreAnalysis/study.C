@@ -61,9 +61,9 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 
 // NU + COSMIC
 // BIGGER DATA SET
-const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 
 // NU + Cosmic ** Without ** the overburden
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2,3,4,5]*/flat*.root";
@@ -88,7 +88,7 @@ const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/m
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2]*/flat*.root";
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*1*/flat*.root";
 
-const bool fRun = true; //false; //true;
+const bool fRun = false; //false; //true;
 
 void study ()
 {
@@ -112,6 +112,10 @@ void study ()
     Spectrum sOtherNuNC_Selct( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueNC && kNuMISelection );
     Spectrum sCosmic_Selct   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutCosmic && kNuMISelection );
     Spectrum sInTime_Selct   ( "Reco Momentum [GeV/c]", kBinsP, loaderInTime, kRecoMuonPNew, kNoSpillCut, kNuMISelection );
+
+    // What's in the NC selected?
+    Spectrum sOtherNuNC_Selct_MuCandidatePDGs ( "Particle type of muon candidate", kBinsPDGType, loader,
+                                                kRecoMuonBestMatchPDG, kNoSpillCut, kCutTrueNC && kNuMISelection );
 
     // -- Look at the protons in selection
     // kRecoProtonP kRecoProtonIsTrueProton
@@ -277,7 +281,26 @@ void study ()
     Spectrum sSignalRES_Selct( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection );
     Spectrum sSignalDIS_Selct( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection );
     Spectrum sSignalCOH_Selct( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection );
-    
+
+    // 0Pi attempted version
+    Spectrum sAll_Selct0Pi      ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi );
+    Spectrum sCosmic_Selct0Pi   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutCosmic && kNuMISelection_0Pi );
+    Spectrum sInTime_Selct0Pi   ( "Reco Momentum [GeV/c]", kBinsP, loaderInTime, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi );
+
+    Spectrum sSignalQEL_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigQEL && kNuMISelection_0Pi );
+    Spectrum sSignalMEC_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigMEC && kNuMISelection_0Pi );
+    Spectrum sSignalRES_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection_0Pi );
+    Spectrum sSignalDIS_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection_0Pi );
+    Spectrum sSignalCOH_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection_0Pi );
+
+    Spectrum sOtherNuCC_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCCButNotSigAll && kNuMISelection_0Pi );
+    Spectrum sOtherNuNC_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueNC && kNuMISelection_0Pi );
+
+    Spectrum sNuCC_1muNp0pi_Selct0Pi   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutSignal_1muNp0pi && kNuMISelection_0Pi );
+    Spectrum sNuCC_Not1muNp0pi_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi );
+
+
+
     // Contained versions
     Spectrum sSignal_Cont_NoCut   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigContained );
     Spectrum sOtherNuCC_Cont_NoCut( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCCButNotSigContained );
@@ -453,6 +476,8 @@ void study ()
     sCosmic_Selct.SaveTo(    fSpec->mkdir("sCosmic_Selct") );
     sInTime_Selct.SaveTo(    fSpec->mkdir("sInTime_Selct") );
 
+    sOtherNuNC_Selct_MuCandidatePDGs.SaveTo( fSpec->mkdir("sOtherNuNC_Selct_MuCandidatePDGs") );
+
     sAll_P_Selct.SaveTo(       fSpec->mkdir("sAll_P_Selct") );
     sSignal_P_Selct.SaveTo(    fSpec->mkdir("sSignal_P_Selct") );
     sOtherNuCC_P_Selct.SaveTo( fSpec->mkdir("sOtherNuCC_P_Selct") );
@@ -563,6 +588,21 @@ void study ()
     sSignalRES_Selct.SaveTo( fSpec->mkdir("sSignalRES_Selct") );
     sSignalDIS_Selct.SaveTo( fSpec->mkdir("sSignalDIS_Selct") );
     sSignalCOH_Selct.SaveTo( fSpec->mkdir("sSignalCOH_Selct") );
+
+    sAll_Selct0Pi.SaveTo( fSpec->mkdir("sAll_Selct0Pi") );
+    sCosmic_Selct0Pi.SaveTo( fSpec->mkdir("sCosmic_Selct0Pi") );
+    sInTime_Selct0Pi.SaveTo( fSpec->mkdir("sInTime_Selct0Pi") );
+    sSignalQEL_Selct0Pi.SaveTo( fSpec->mkdir("sSignalQEL_Selct0Pi") );
+    sSignalMEC_Selct0Pi.SaveTo( fSpec->mkdir("sSignalMEC_Selct0Pi") );
+    sSignalRES_Selct0Pi.SaveTo( fSpec->mkdir("sSignalRES_Selct0Pi") );
+    sSignalDIS_Selct0Pi.SaveTo( fSpec->mkdir("sSignalDIS_Selct0Pi") );
+    sSignalCOH_Selct0Pi.SaveTo( fSpec->mkdir("sSignalCOH_Selct0Pi") );
+    sOtherNuCC_Selct0Pi.SaveTo( fSpec->mkdir("sOtherNuCC_Selct0Pi") );
+    sOtherNuNC_Selct0Pi.SaveTo( fSpec->mkdir("sOtherNuNC_Selct0Pi") );
+
+    sNuCC_1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_1muNp0pi_Selct0Pi") );
+    sNuCC_Not1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_Not1muNp0pi_Selct0Pi") );
+
 
     sAll_Cont_Selct.SaveTo(       fSpec->mkdir("sAll_Cont_Selct") );
     sSignal_Cont_Selct.SaveTo(    fSpec->mkdir("sSignal_Cont_Selct") );
@@ -709,6 +749,21 @@ void study ()
   Spectrum *sSignalDIS_Selct = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct").release();
   Spectrum *sSignalCOH_Selct = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct").release();
 
+  Spectrum *sAll_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sAll_Selct0Pi").release();
+  Spectrum *sCosmic_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sCosmic_Selct0Pi").release();
+  Spectrum *sInTime_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sInTime_Selct0Pi").release();
+  Spectrum *sSignalQEL_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sSignalQEL_Selct0Pi").release();
+  Spectrum *sSignalMEC_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sSignalMEC_Selct0Pi").release();
+  Spectrum *sSignalRES_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sSignalRES_Selct0Pi").release();
+  Spectrum *sSignalDIS_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct0Pi").release();
+  Spectrum *sSignalCOH_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct0Pi").release();
+  Spectrum *sOtherNuCC_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sOtherNuCC_Selct0Pi").release();
+  Spectrum *sOtherNuNC_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct0Pi").release();
+
+  Spectrum *sNuCC_1muNp0pi_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sNuCC_1muNp0pi_Selct0Pi").release();
+  Spectrum *sNuCC_Not1muNp0pi_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sNuCC_Not1muNp0pi_Selct0Pi").release();
+
+
   Spectrum *sSignal_Cont_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal_Cont_NoCut").release();
   Spectrum *sOtherNuCC_Cont_NoCut = LoadFromFile<Spectrum>(fLoad,"sOtherNuCC_Cont_NoCut").release();
 
@@ -718,6 +773,8 @@ void study ()
   Spectrum *sOtherNuNC_Selct = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct").release();
   Spectrum *sCosmic_Selct = LoadFromFile<Spectrum>(fLoad,"sCosmic_Selct").release();
   Spectrum *sInTime_Selct = LoadFromFile<Spectrum>(fLoad,"sInTime_Selct").release();
+
+  Spectrum *sOtherNuNC_Selct_MuCandidatePDGs = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct_MuCandidatePDGs").release();
 
   Spectrum *sAll_P_Selct = LoadFromFile<Spectrum>(fLoad,"sAll_P_Selct").release();
   Spectrum *sSignal_P_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal_P_Selct").release();
@@ -967,6 +1024,9 @@ void study ()
   TH1* hAll_Selct      = sAll_Selct->ToTH1( pot, kBlack );
   hAll_Selct->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
+  TH1* hAll_Selct0Pi      = sAll_Selct0Pi->ToTH1( pot, kBlack );
+  hAll_Selct0Pi->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
   TH1* hAll_P_Selct      = sAll_P_Selct->ToTH1( pot, kBlack );
   hAll_P_Selct->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
@@ -1002,6 +1062,9 @@ void study ()
 
   TH1* hSignalwProton_recoMuMom_BaseSliceSel = sSignalwProton_recoMuMom_BaseSliceSel->ToTH1( pot, kBlack );
   hSignalwProton_recoMuMom_BaseSliceSel->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
+  TH1* hOtherNuNC_Selct_MuCandidatePDGs = sOtherNuNC_Selct_MuCandidatePDGs->ToTH1( pot, kBlack );
+  hOtherNuNC_Selct_MuCandidatePDGs->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
 
   TH1* hSignal_NoCut    = sSignal_NoCut->ToTH1( pot, colorwheel[0] );    hSignal_NoCut->SetFillColor(colorwheel[0]);
@@ -1149,6 +1212,24 @@ void study ()
 
   TH1* hInTime_NoCut    = sInTime_NoCut->ToTH1( cosmicLivetime, colorwheel[4], kSolid, kLivetime ); hInTime_NoCut->SetFillColor(colorwheel[4]);
   TH1* hInTime_Selct    = sInTime_Selct->ToTH1( cosmicLivetime, colorwheel[4], kSolid, kLivetime ); hInTime_Selct->SetFillColor(colorwheel[4]);
+
+
+  // TRYING 0Pi Sample -- "all" case defined above...
+  TH1* hSignalQEL_Selct0Pi = sSignalQEL_Selct0Pi->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0Pi->SetFillColor(colorwheel_mode[0]);
+  TH1* hSignalMEC_Selct0Pi = sSignalMEC_Selct0Pi->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0Pi->SetFillColor(colorwheel_mode[1]);
+  TH1* hSignalRES_Selct0Pi = sSignalRES_Selct0Pi->ToTH1( pot, colorwheel_mode[2] ); hSignalRES_Selct0Pi->SetFillColor(colorwheel_mode[2]);
+  TH1* hSignalDIS_Selct0Pi = sSignalDIS_Selct0Pi->ToTH1( pot, colorwheel_mode[3] ); hSignalDIS_Selct0Pi->SetFillColor(colorwheel_mode[3]);
+  TH1* hSignalCOH_Selct0Pi = sSignalCOH_Selct0Pi->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_Selct0Pi->SetFillColor(colorwheel_mode[4]);
+  TH1* hSignalELS_Selct0Pi = sOtherNuCC_Selct0Pi->ToTH1( pot, colorwheel_mode[5] ); hSignalELS_Selct0Pi->SetFillColor(colorwheel_mode[5]);
+
+  TH1* hOtherNuNC_Selct0Pi = sOtherNuNC_Selct0Pi->ToTH1( pot, colorwheel[2] ); hOtherNuNC_Selct0Pi->SetFillColor(colorwheel[2]);
+  TH1* hCosmic_Selct0Pi    = sCosmic_Selct0Pi->ToTH1( pot, colorwheel[3] );    hCosmic_Selct0Pi->SetFillColor(colorwheel[3]);
+  TH1* hInTime_Selct0Pi    = sInTime_Selct0Pi->ToTH1( cosmicLivetime, colorwheel[4], kSolid, kLivetime ); hInTime_Selct0Pi->SetFillColor(colorwheel[4]);
+
+  TH1* hNuCC_1muNp0pi_Selct0Pi = sNuCC_1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[0] ); hNuCC_1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[0]);
+  TH1* hNuCC_Not1muNp0pi_Selct0Pi = sNuCC_Not1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[3] ); hNuCC_Not1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[3]);
+  // ------------------------------------------------
+
 
   TH1* hSignal_Cont_NoCut    = sSignal_Cont_NoCut->ToTH1( pot, colorwheel[0] );    hSignal_Cont_NoCut->SetFillColor(colorwheel[0]);
   TH1* hOtherNuCC_Cont_NoCut = sOtherNuCC_Cont_NoCut->ToTH1( pot, colorwheel[1] ); hOtherNuCC_Cont_NoCut->SetFillColor(colorwheel[1]);
@@ -1298,6 +1379,8 @@ void study ()
   hAll_NoCut->Add(hInTime_NoCut);
   hAll_Selct->Add(hInTime_Selct);
 
+  hAll_Selct0Pi->Add(hInTime_Selct0Pi);
+
   hAll_P_Selct->Add(hInTime_P_Selct);
   hBackgd_P_Selct->Add(hInTime_P_Selct);
 
@@ -1433,6 +1516,61 @@ void study ()
   hAll_Selct->Draw("hist same");
   tLMode_Selct->Draw();
   gPad->Print("Spectrum_Modes_Selected.pdf");
+
+  // 0 Pi attempted version: (BH BH BH)
+  double totalCounts_Selct0Pi = hAll_Selct0Pi->Integral();
+  TLegend *tLMode_Selct0Pi = new TLegend(0.6,0.6,0.87,0.87);
+  tLMode_Selct0Pi->AddEntry(hSignalQEL_Selct0Pi,TString::Format("NuMu CC QEL: %.1f%%",100.*hSignalQEL_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hSignalMEC_Selct0Pi,TString::Format("NuMu CC MEC: %.1f%%",100.*hSignalMEC_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hSignalRES_Selct0Pi,TString::Format("NuMu CC RES: %.1f%%",100.*hSignalRES_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hSignalDIS_Selct0Pi,TString::Format("NuMu CC DIS: %.1f%%",100.*hSignalDIS_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hSignalCOH_Selct0Pi,TString::Format("NuMu CC COH: %.1f%%",100.*hSignalCOH_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hSignalELS_Selct0Pi,TString::Format("NuMu CC NonSig: %.1f%%",100.*hSignalELS_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hOtherNuNC_Selct0Pi,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hCosmic_Selct0Pi,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLMode_Selct0Pi->AddEntry(hInTime_Selct0Pi,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+
+  THStack *hStackMode_Selct0Pi = new THStack("hStackMode_Selct0Pi", "");
+  hStackMode_Selct0Pi->Add(hSignalQEL_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hSignalMEC_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hSignalRES_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hSignalDIS_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hSignalCOH_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hSignalELS_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hOtherNuNC_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hInTime_Selct0Pi);
+  hStackMode_Selct0Pi->Add(hCosmic_Selct0Pi);
+
+  new TCanvas;
+  hAll_Selct0Pi->Draw("hist");
+  hStackMode_Selct0Pi->Draw("hist same");
+  hAll_Selct0Pi->Draw("hist same");
+  tLMode_Selct0Pi->Draw();
+  gPad->Print("Spectrum_Modes_Selected_0Pi.pdf");
+
+  // Second way of looking at it...
+  TLegend *tLSigMode_Selct0Pi = new TLegend(0.6,0.6,0.87,0.87);
+  tLSigMode_Selct0Pi->AddEntry(hNuCC_1muNp0pi_Selct0Pi,TString::Format("NuCC 1muNp0pi: %.1f%%",100.*hNuCC_1muNp0pi_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLSigMode_Selct0Pi->AddEntry(hNuCC_Not1muNp0pi_Selct0Pi,TString::Format("NuCC Not1muNp0pi: %.1f%%",100.*hNuCC_Not1muNp0pi_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLSigMode_Selct0Pi->AddEntry(hOtherNuNC_Selct0Pi,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLSigMode_Selct0Pi->AddEntry(hCosmic_Selct0Pi,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+  tLSigMode_Selct0Pi->AddEntry(hInTime_Selct0Pi,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
+
+  THStack *hStackSigMode_Selct0Pi = new THStack("hStackMode_Selct0Pi", "");
+  hStackSigMode_Selct0Pi->Add(hNuCC_1muNp0pi_Selct0Pi);
+  hStackSigMode_Selct0Pi->Add(hNuCC_Not1muNp0pi_Selct0Pi);
+  hStackSigMode_Selct0Pi->Add(hOtherNuNC_Selct0Pi);
+  hStackSigMode_Selct0Pi->Add(hInTime_Selct0Pi);
+  hStackSigMode_Selct0Pi->Add(hCosmic_Selct0Pi);
+
+  new TCanvas;
+  hAll_Selct0Pi->Draw("hist");
+  hStackSigMode_Selct0Pi->Draw("hist same");
+  hAll_Selct0Pi->Draw("hist same");
+  tLSigMode_Selct0Pi->Draw();
+  gPad->Print("Spectrum_SignalModes_Selected_0Pi.pdf");
+
+
 
   // PROTONS
   double totalCounts_P_Selct = hAll_P_Selct->Integral();
@@ -2245,6 +2383,28 @@ void study ()
   hNotProtonStubDQDxVsLen->GetXaxis()->SetTitle("stub length [cm]");
   hNotProtonStubDQDxVsLen->GetYaxis()->SetTitle("stub DQ/Dx [e-/cm]");
   gPad->Print("hNotProtonStubDQDxVsLen.pdf");
+
+  // Looking at muon candidate in NC events...
+  new TCanvas;
+  double hist_max = 1630;
+  hOtherNuNC_Selct_MuCandidatePDGs->GetYaxis()->SetRangeUser(0.,hist_max);
+  hOtherNuNC_Selct_MuCandidatePDGs->Draw("hist");
+
+  TLine *l1 = new TLine(1,0,1,hist_max); l1->SetLineStyle(3); l1->SetLineColor(kGray+1); l1->Draw("same");
+  TLine *l2 = new TLine(2,0,2,hist_max); l2->SetLineStyle(3); l2->SetLineColor(kGray+1); l2->Draw("same");
+  TLine *l3 = new TLine(3,0,3,hist_max); l3->SetLineStyle(3); l3->SetLineColor(kGray+1); l3->Draw("same");
+  TLine *l4 = new TLine(4,0,4,hist_max); l4->SetLineStyle(3); l4->SetLineColor(kGray+1); l4->Draw("same");
+  TLine *l5 = new TLine(5,0,5,hist_max); l5->SetLineStyle(3); l5->SetLineColor(kGray+1); l5->Draw("same");
+  TLine *l6 = new TLine(6,0,6,hist_max); l6->SetLineStyle(3); l6->SetLineColor(kGray+1); l6->Draw("same");
+
+  hOtherNuNC_Selct_MuCandidatePDGs->Draw("hist same");
+  gPad->Print("hOtherNuNC_Selct_MuCandidatePDGs.pdf");
+
+
+  std::cout << " ----------------------------------- " << std::endl;
+  std::cout << "|    Efficiency calc wProton sel    |" << std::endl;
+  std::cout << " ----------------------------------- " << std::endl;
+  std::cout << 100. * sSignalwProton_TrueMuMom_Selct_SpillMV->Integral(pot) / sSignalwProton_TrueMuMom_SpillMV->Integral(pot) << " %" << std::endl;
 
   std::cout << "" << std::endl;
   std::cout << "Done." << std::endl;
