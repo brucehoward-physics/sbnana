@@ -57,3 +57,9 @@ Thumbs.db
 *.bak
 *.backup
 sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/GraysSampleCuts.h
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup.csv
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup_postChi2.csv
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup_postChi2_better.csv
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup_TertiaryShowers_preFix.csv
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup_TertiaryShowersLarger.csv
+sbnana/SBNAna/icarus-analysis-villiage/sbnana/ExploreAnalysis/nohup_TertiaryShowersLarger_preFix.csv
