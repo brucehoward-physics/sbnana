@@ -754,7 +754,7 @@ const MultiVar kTrueParticlePionPDGs([](const caf::SRSliceProxy* slc) {
       if ( prim.pdg == -211 ) pdgs.push_back( 5. + std::numeric_limits<double>::epsilon() );
     }
 
-    if ( pdgs.size() == 0 ) pdgs.push_back( 8. + std::numeric_limits<double>::epsilon() );
+    if ( pdgs.size() == 0 ) pdgs.push_back( 7. + std::numeric_limits<double>::epsilon() );
 
     return pdgs;
   });
