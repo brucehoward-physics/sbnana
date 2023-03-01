@@ -64,6 +64,7 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
 const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*1*.root";
 
 // NU + Cosmic ** Without ** the overburden
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2,3,4,5]*/flat*.root";
@@ -76,6 +77,8 @@ const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*[1,2,3]*/flat*.root";
 // FROM JAESUNG
 const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*1*.root"; //"[0,1,2,3,4]*.root";
+// & higher stats
+//const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*.root";
 
 // In-time cosmic ** Without ** the overburden
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*/flat*.root";
@@ -116,6 +119,13 @@ void study ()
     // What's in the NC selected?
     Spectrum sOtherNuNC_Selct_MuCandidatePDGs ( "Particle type of muon candidate", kBinsPDGType, loader,
                                                 kRecoMuonBestMatchPDG, kNoSpillCut, kCutTrueNC && kNuMISelection );
+
+    // CHECK IN THE 0 PI SELECTION AS WELL
+    Spectrum sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs ( "Particle type of muon candidate", kBinsPDGType, loader,
+                                                             kRecoMuonBestMatchPDG, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi );
+    Spectrum sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs ( "Breakdown of true pion primaries", kBinsPDGType, loader,
+                                                          kTrueParticlePionPDGs, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi );
+
 
     // -- Look at the protons in selection
     // kRecoProtonP kRecoProtonIsTrueProton
@@ -299,6 +309,23 @@ void study ()
     Spectrum sNuCC_1muNp0pi_Selct0Pi   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutSignal_1muNp0pi && kNuMISelection_0Pi );
     Spectrum sNuCC_Not1muNp0pi_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi );
 
+    // 0Pi attempted version --> WITHOUT CR TRK DIR Y CUT
+    Spectrum sAll_Selct0PiNoTrkY      ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sCosmic_Selct0PiNoTrkY   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutCosmic && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sInTime_Selct0PiNoTrkY   ( "Reco Momentum [GeV/c]", kBinsP, loaderInTime, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi_NoTrkDirY );
+
+    Spectrum sSignalQEL_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigQEL && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sSignalMEC_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigMEC && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sSignalRES_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sSignalDIS_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sSignalCOH_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection_0Pi_NoTrkDirY );
+
+    Spectrum sOtherNuCC_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCCButNotSigAll && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sOtherNuNC_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueNC && kNuMISelection_0Pi_NoTrkDirY );
+
+    Spectrum sNuCC_1muNp0pi_Selct0PiNoTrkY   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutSignal_1muNp0pi && kNuMISelection_0Pi_NoTrkDirY );
+    Spectrum sNuCC_Not1muNp0pi_Selct0PiNoTrkY( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi_NoTrkDirY );
+
 
 
     // Contained versions
@@ -478,6 +505,10 @@ void study ()
 
     sOtherNuNC_Selct_MuCandidatePDGs.SaveTo( fSpec->mkdir("sOtherNuNC_Selct_MuCandidatePDGs") );
 
+    sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs.SaveTo( fSpec->mkdir("sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs") );
+    sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs.SaveTo( fSpec->mkdir("sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs") );
+
+
     sAll_P_Selct.SaveTo(       fSpec->mkdir("sAll_P_Selct") );
     sSignal_P_Selct.SaveTo(    fSpec->mkdir("sSignal_P_Selct") );
     sOtherNuCC_P_Selct.SaveTo( fSpec->mkdir("sOtherNuCC_P_Selct") );
@@ -603,6 +634,19 @@ void study ()
     sNuCC_1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_1muNp0pi_Selct0Pi") );
     sNuCC_Not1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_Not1muNp0pi_Selct0Pi") );
 
+    sAll_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sAll_Selct0PiNoTrkY") );
+    sCosmic_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sCosmic_Selct0PiNoTrkY") );
+    sInTime_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sInTime_Selct0PiNoTrkY") );
+    sSignalQEL_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sSignalQEL_Selct0PiNoTrkY") );
+    sSignalMEC_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sSignalMEC_Selct0PiNoTrkY") );
+    sSignalRES_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sSignalRES_Selct0PiNoTrkY") );
+    sSignalDIS_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sSignalDIS_Selct0PiNoTrkY") );
+    sSignalCOH_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sSignalCOH_Selct0PiNoTrkY") );
+    sOtherNuCC_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sOtherNuCC_Selct0PiNoTrkY") );
+    sOtherNuNC_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sOtherNuNC_Selct0PiNoTrkY") );
+
+    sNuCC_1muNp0pi_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sNuCC_1muNp0pi_Selct0PiNoTrkY") );
+    sNuCC_Not1muNp0pi_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sNuCC_Not1muNp0pi_Selct0PiNoTrkY") );
 
     sAll_Cont_Selct.SaveTo(       fSpec->mkdir("sAll_Cont_Selct") );
     sSignal_Cont_Selct.SaveTo(    fSpec->mkdir("sSignal_Cont_Selct") );
@@ -764,6 +808,21 @@ void study ()
   Spectrum *sNuCC_Not1muNp0pi_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sNuCC_Not1muNp0pi_Selct0Pi").release();
 
 
+  Spectrum *sAll_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sAll_Selct0PiNoTrkY").release();
+  Spectrum *sCosmic_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sCosmic_Selct0PiNoTrkY").release();
+  Spectrum *sInTime_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sInTime_Selct0PiNoTrkY").release();
+  Spectrum *sSignalQEL_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sSignalQEL_Selct0PiNoTrkY").release();
+  Spectrum *sSignalMEC_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sSignalMEC_Selct0PiNoTrkY").release();
+  Spectrum *sSignalRES_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sSignalRES_Selct0PiNoTrkY").release();
+  Spectrum *sSignalDIS_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct0PiNoTrkY").release();
+  Spectrum *sSignalCOH_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct0PiNoTrkY").release();
+  Spectrum *sOtherNuCC_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sOtherNuCC_Selct0PiNoTrkY").release();
+  Spectrum *sOtherNuNC_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct0PiNoTrkY").release();
+
+  Spectrum *sNuCC_1muNp0pi_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sNuCC_1muNp0pi_Selct0PiNoTrkY").release();
+  Spectrum *sNuCC_Not1muNp0pi_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sNuCC_Not1muNp0pi_Selct0PiNoTrkY").release();
+
+
   Spectrum *sSignal_Cont_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal_Cont_NoCut").release();
   Spectrum *sOtherNuCC_Cont_NoCut = LoadFromFile<Spectrum>(fLoad,"sOtherNuCC_Cont_NoCut").release();
 
@@ -775,6 +834,10 @@ void study ()
   Spectrum *sInTime_Selct = LoadFromFile<Spectrum>(fLoad,"sInTime_Selct").release();
 
   Spectrum *sOtherNuNC_Selct_MuCandidatePDGs = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct_MuCandidatePDGs").release();
+
+  Spectrum *sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs = LoadFromFile<Spectrum>(fLoad,"sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs").release();
+  Spectrum *sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs = LoadFromFile<Spectrum>(fLoad,"sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs").release();
+
 
   Spectrum *sAll_P_Selct = LoadFromFile<Spectrum>(fLoad,"sAll_P_Selct").release();
   Spectrum *sSignal_P_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal_P_Selct").release();
@@ -1027,6 +1090,9 @@ void study ()
   TH1* hAll_Selct0Pi      = sAll_Selct0Pi->ToTH1( pot, kBlack );
   hAll_Selct0Pi->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
+  TH1* hAll_Selct0PiNoTrkY      = sAll_Selct0PiNoTrkY->ToTH1( pot, kBlack );
+  hAll_Selct0PiNoTrkY->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
   TH1* hAll_P_Selct      = sAll_P_Selct->ToTH1( pot, kBlack );
   hAll_P_Selct->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
@@ -1065,6 +1131,14 @@ void study ()
 
   TH1* hOtherNuNC_Selct_MuCandidatePDGs = sOtherNuNC_Selct_MuCandidatePDGs->ToTH1( pot, kBlack );
   hOtherNuNC_Selct_MuCandidatePDGs->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
+
+  TH1* hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs = sOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->ToTH1( pot, kBlack );
+  hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
+  TH1* hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs = sOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->ToTH1( pot, kBlack );
+  hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
 
 
   TH1* hSignal_NoCut    = sSignal_NoCut->ToTH1( pot, colorwheel[0] );    hSignal_NoCut->SetFillColor(colorwheel[0]);
@@ -1228,6 +1302,21 @@ void study ()
 
   TH1* hNuCC_1muNp0pi_Selct0Pi = sNuCC_1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[0] ); hNuCC_1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[0]);
   TH1* hNuCC_Not1muNp0pi_Selct0Pi = sNuCC_Not1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[3] ); hNuCC_Not1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[3]);
+
+  // NoTrkY version
+  TH1* hSignalQEL_Selct0PiNoTrkY = sSignalQEL_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[0]);
+  TH1* hSignalMEC_Selct0PiNoTrkY = sSignalMEC_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[1]);
+  TH1* hSignalRES_Selct0PiNoTrkY = sSignalRES_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[2] ); hSignalRES_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[2]);
+  TH1* hSignalDIS_Selct0PiNoTrkY = sSignalDIS_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[3] ); hSignalDIS_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[3]);
+  TH1* hSignalCOH_Selct0PiNoTrkY = sSignalCOH_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[4]);
+  TH1* hSignalELS_Selct0PiNoTrkY = sOtherNuCC_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[5] ); hSignalELS_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[5]);
+
+  TH1* hOtherNuNC_Selct0PiNoTrkY = sOtherNuNC_Selct0PiNoTrkY->ToTH1( pot, colorwheel[2] ); hOtherNuNC_Selct0PiNoTrkY->SetFillColor(colorwheel[2]);
+  TH1* hCosmic_Selct0PiNoTrkY    = sCosmic_Selct0PiNoTrkY->ToTH1( pot, colorwheel[3] );    hCosmic_Selct0PiNoTrkY->SetFillColor(colorwheel[3]);
+  TH1* hInTime_Selct0PiNoTrkY    = sInTime_Selct0PiNoTrkY->ToTH1( cosmicLivetime, colorwheel[4], kSolid, kLivetime ); hInTime_Selct0PiNoTrkY->SetFillColor(colorwheel[4]);
+
+  TH1* hNuCC_1muNp0pi_Selct0PiNoTrkY = sNuCC_1muNp0pi_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[0] ); hNuCC_1muNp0pi_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[0]);
+  TH1* hNuCC_Not1muNp0pi_Selct0PiNoTrkY = sNuCC_Not1muNp0pi_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[3] ); hNuCC_Not1muNp0pi_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[3]);
   // ------------------------------------------------
 
 
@@ -1380,6 +1469,7 @@ void study ()
   hAll_Selct->Add(hInTime_Selct);
 
   hAll_Selct0Pi->Add(hInTime_Selct0Pi);
+  hAll_Selct0PiNoTrkY->Add(hInTime_Selct0PiNoTrkY);
 
   hAll_P_Selct->Add(hInTime_P_Selct);
   hBackgd_P_Selct->Add(hInTime_P_Selct);
@@ -1569,6 +1659,60 @@ void study ()
   hAll_Selct0Pi->Draw("hist same");
   tLSigMode_Selct0Pi->Draw();
   gPad->Print("Spectrum_SignalModes_Selected_0Pi.pdf");
+
+
+  ///// NO TRK Y DIR VERSION
+  double totalCounts_Selct0PiNoTrkY = hAll_Selct0PiNoTrkY->Integral();
+  TLegend *tLMode_Selct0PiNoTrkY = new TLegend(0.6,0.6,0.87,0.87);
+  tLMode_Selct0PiNoTrkY->AddEntry(hSignalQEL_Selct0PiNoTrkY,TString::Format("NuMu CC QEL: %.1f%%",100.*hSignalQEL_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hSignalMEC_Selct0PiNoTrkY,TString::Format("NuMu CC MEC: %.1f%%",100.*hSignalMEC_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hSignalRES_Selct0PiNoTrkY,TString::Format("NuMu CC RES: %.1f%%",100.*hSignalRES_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hSignalDIS_Selct0PiNoTrkY,TString::Format("NuMu CC DIS: %.1f%%",100.*hSignalDIS_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hSignalCOH_Selct0PiNoTrkY,TString::Format("NuMu CC COH: %.1f%%",100.*hSignalCOH_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hOtherNuNC_Selct0PiNoTrkY,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hCosmic_Selct0PiNoTrkY,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLMode_Selct0PiNoTrkY->AddEntry(hInTime_Selct0PiNoTrkY,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+
+  THStack *hStackMode_Selct0PiNoTrkY = new THStack("hStackMode_Selct0PiNoTrkY", "");
+  hStackMode_Selct0PiNoTrkY->Add(hSignalQEL_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hSignalMEC_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hSignalRES_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hSignalDIS_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hSignalCOH_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hSignalELS_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hOtherNuNC_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hInTime_Selct0PiNoTrkY);
+  hStackMode_Selct0PiNoTrkY->Add(hCosmic_Selct0PiNoTrkY);
+
+  new TCanvas;
+  hAll_Selct0PiNoTrkY->Draw("hist");
+  hStackMode_Selct0PiNoTrkY->Draw("hist same");
+  hAll_Selct0PiNoTrkY->Draw("hist same");
+  tLMode_Selct0PiNoTrkY->Draw();
+  gPad->Print("Spectrum_Modes_Selected_0PiNoTrkY.pdf");
+
+  // Second way of looking at it...
+  TLegend *tLSigMode_Selct0PiNoTrkY = new TLegend(0.6,0.6,0.87,0.87);
+  tLSigMode_Selct0PiNoTrkY->AddEntry(hNuCC_1muNp0pi_Selct0PiNoTrkY,TString::Format("NuCC 1muNp0pi: %.1f%%",100.*hNuCC_1muNp0pi_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLSigMode_Selct0PiNoTrkY->AddEntry(hNuCC_Not1muNp0pi_Selct0PiNoTrkY,TString::Format("NuCC Not1muNp0pi: %.1f%%",100.*hNuCC_Not1muNp0pi_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLSigMode_Selct0PiNoTrkY->AddEntry(hOtherNuNC_Selct0PiNoTrkY,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLSigMode_Selct0PiNoTrkY->AddEntry(hCosmic_Selct0PiNoTrkY,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+  tLSigMode_Selct0PiNoTrkY->AddEntry(hInTime_Selct0PiNoTrkY,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0PiNoTrkY->Integral()/totalCounts_Selct0PiNoTrkY),"f");
+
+  THStack *hStackSigMode_Selct0PiNoTrkY = new THStack("hStackMode_Selct0PiNoTrkY", "");
+  hStackSigMode_Selct0PiNoTrkY->Add(hNuCC_1muNp0pi_Selct0PiNoTrkY);
+  hStackSigMode_Selct0PiNoTrkY->Add(hNuCC_Not1muNp0pi_Selct0PiNoTrkY);
+  hStackSigMode_Selct0PiNoTrkY->Add(hOtherNuNC_Selct0PiNoTrkY);
+  hStackSigMode_Selct0PiNoTrkY->Add(hInTime_Selct0PiNoTrkY);
+  hStackSigMode_Selct0PiNoTrkY->Add(hCosmic_Selct0PiNoTrkY);
+
+  new TCanvas;
+  hAll_Selct0PiNoTrkY->Draw("hist");
+  hStackSigMode_Selct0PiNoTrkY->Draw("hist same");
+  hAll_Selct0PiNoTrkY->Draw("hist same");
+  tLSigMode_Selct0PiNoTrkY->Draw();
+  gPad->Print("Spectrum_SignalModes_Selected_0PiNoTrkY.pdf");
+
 
 
 
@@ -2386,7 +2530,7 @@ void study ()
 
   // Looking at muon candidate in NC events...
   new TCanvas;
-  double hist_max = 1630;
+  double hist_max = 1.25*hOtherNuNC_Selct_MuCandidatePDGs->GetMaximum();
   hOtherNuNC_Selct_MuCandidatePDGs->GetYaxis()->SetRangeUser(0.,hist_max);
   hOtherNuNC_Selct_MuCandidatePDGs->Draw("hist");
 
@@ -2396,9 +2540,73 @@ void study ()
   TLine *l4 = new TLine(4,0,4,hist_max); l4->SetLineStyle(3); l4->SetLineColor(kGray+1); l4->Draw("same");
   TLine *l5 = new TLine(5,0,5,hist_max); l5->SetLineStyle(3); l5->SetLineColor(kGray+1); l5->Draw("same");
   TLine *l6 = new TLine(6,0,6,hist_max); l6->SetLineStyle(3); l6->SetLineColor(kGray+1); l6->Draw("same");
+  TLine *l7 = new TLine(7,0,7,hist_max); l7->SetLineStyle(3); l7->SetLineColor(kGray+1); l7->Draw("same");
+
+  TPaveText *txtncEl = new TPaveText( 0.2, 0.85*hist_max, 0.8, 0.98*hist_max, "NB" ); txtncEl->AddText(" e "); ((TText*)txtncEl->GetListOfLines()->Last())->SetTextColor(kRed); txtncEl->Draw();
+  TPaveText *txtncMu = new TPaveText( 1.2, 0.85*hist_max, 1.8, 0.98*hist_max, "NB" ); txtncMu->AddText(" #mu "); ((TText*)txtncMu->GetListOfLines()->Last())->SetTextColor(kRed); txtncMu->Draw();
+  TPaveText *txtncPh = new TPaveText( 2.2, 0.85*hist_max, 2.8, 0.98*hist_max, "NB" ); txtncPh->AddText(" ph "); ((TText*)txtncPh->GetListOfLines()->Last())->SetTextColor(kRed); txtncPh->Draw();
+  TPaveText *txtncPi0 = new TPaveText( 3.2, 0.85*hist_max, 3.8, 0.98*hist_max, "NB" ); txtncPi0->AddText("pi0"); ((TText*)txtncPi0->GetListOfLines()->Last())->SetTextColor(kRed); txtncPi0->Draw();
+  TPaveText *txtncPiP = new TPaveText( 4.2, 0.85*hist_max, 4.8, 0.98*hist_max, "NB" ); txtncPiP->AddText("pi+"); ((TText*)txtncPiP->GetListOfLines()->Last())->SetTextColor(kRed); txtncPiP->Draw();
+  TPaveText *txtncPiM = new TPaveText( 5.2, 0.85*hist_max, 5.8, 0.98*hist_max, "NB" ); txtncPiM->AddText("pi-"); ((TText*)txtncPiM->GetListOfLines()->Last())->SetTextColor(kRed); txtncPiM->Draw();
+  TPaveText *txtncPr = new TPaveText( 6.2, 0.85*hist_max, 6.8, 0.98*hist_max, "NB" ); txtncPr->AddText(" p "); ((TText*)txtncPr->GetListOfLines()->Last())->SetTextColor(kRed); txtncPr->Draw();
+  TPaveText *txtncO = new TPaveText( 7.2, 0.85*hist_max, 7.8, 0.98*hist_max, "NB" ); txtncO->AddText("other"); ((TText*)txtncO->GetListOfLines()->Last())->SetTextColor(kRed); txtncO->Draw();
 
   hOtherNuNC_Selct_MuCandidatePDGs->Draw("hist same");
   gPad->Print("hOtherNuNC_Selct_MuCandidatePDGs.pdf");
+
+  // And some breakdowns for Nu CC non-signal in the 0Pi selection (in part looking at pions...)
+  new TCanvas;
+  hist_max = 1.25*hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->GetMaximum();
+  hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->GetYaxis()->SetRangeUser(0.,hist_max);
+  hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->Draw("hist");
+
+  TLine *l1_2 = new TLine(1,0,1,hist_max); l1_2->SetLineStyle(3); l1_2->SetLineColor(kGray+1); l1_2->Draw("same");
+  TLine *l2_2 = new TLine(2,0,2,hist_max); l2_2->SetLineStyle(3); l2_2->SetLineColor(kGray+1); l2_2->Draw("same");
+  TLine *l3_2 = new TLine(3,0,3,hist_max); l3_2->SetLineStyle(3); l3_2->SetLineColor(kGray+1); l3_2->Draw("same");
+  TLine *l4_2 = new TLine(4,0,4,hist_max); l4_2->SetLineStyle(3); l4_2->SetLineColor(kGray+1); l4_2->Draw("same");
+  TLine *l5_2 = new TLine(5,0,5,hist_max); l5_2->SetLineStyle(3); l5_2->SetLineColor(kGray+1); l5_2->Draw("same");
+  TLine *l6_2 = new TLine(6,0,6,hist_max); l6_2->SetLineStyle(3); l6_2->SetLineColor(kGray+1); l6_2->Draw("same");
+  TLine *l7_2 = new TLine(7,0,7,hist_max); l7_2->SetLineStyle(3); l7_2->SetLineColor(kGray+1); l7_2->Draw("same");
+
+  TPaveText *txtEl = new TPaveText( 0.2, 0.85*hist_max, 0.8, 0.98*hist_max, "NB" ); txtEl->AddText(" e "); ((TText*)txtEl->GetListOfLines()->Last())->SetTextColor(kRed); txtEl->Draw();
+  TPaveText *txtMu = new TPaveText( 1.2, 0.85*hist_max, 1.8, 0.98*hist_max, "NB" ); txtMu->AddText(" #mu "); ((TText*)txtMu->GetListOfLines()->Last())->SetTextColor(kRed); txtMu->Draw();
+  TPaveText *txtPh = new TPaveText( 2.2, 0.85*hist_max, 2.8, 0.98*hist_max, "NB" ); txtPh->AddText(" ph "); ((TText*)txtPh->GetListOfLines()->Last())->SetTextColor(kRed); txtPh->Draw();
+  TPaveText *txtPi0 = new TPaveText( 3.2, 0.85*hist_max, 3.8, 0.98*hist_max, "NB" ); txtPi0->AddText("pi0"); ((TText*)txtPi0->GetListOfLines()->Last())->SetTextColor(kRed); txtPi0->Draw();
+  TPaveText *txtPiP = new TPaveText( 4.2, 0.85*hist_max, 4.8, 0.98*hist_max, "NB" ); txtPiP->AddText("pi+"); ((TText*)txtPiP->GetListOfLines()->Last())->SetTextColor(kRed); txtPiP->Draw();
+  TPaveText *txtPiM = new TPaveText( 5.2, 0.85*hist_max, 5.8, 0.98*hist_max, "NB" ); txtPiM->AddText("pi-"); ((TText*)txtPiM->GetListOfLines()->Last())->SetTextColor(kRed); txtPiM->Draw();
+  TPaveText *txtPr = new TPaveText( 6.2, 0.85*hist_max, 6.8, 0.98*hist_max, "NB" ); txtPr->AddText(" p "); ((TText*)txtPr->GetListOfLines()->Last())->SetTextColor(kRed); txtPr->Draw();
+  TPaveText *txtO = new TPaveText( 7.2, 0.85*hist_max, 7.8, 0.98*hist_max, "NB" ); txtO->AddText("other"); ((TText*)txtO->GetListOfLines()->Last())->SetTextColor(kRed); txtO->Draw();
+
+  hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs->Draw("hist same");
+  gPad->Print("hOtherSelCCNotSignal_Selct0Pi_MuCandidatePDGs.pdf");
+
+
+  new TCanvas;
+  hist_max = 1.25*hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->GetMaximum();
+  hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->GetYaxis()->SetRangeUser(0.,hist_max);
+  hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->Draw("hist");
+
+  TLine *l1_3 = new TLine(1,0,1,hist_max); l1_3->SetLineStyle(3); l1_3->SetLineColor(kGray+1); l1_3->Draw("same");
+  TLine *l2_3 = new TLine(2,0,2,hist_max); l2_3->SetLineStyle(3); l2_3->SetLineColor(kGray+1); l2_3->Draw("same");
+  TLine *l3_3 = new TLine(3,0,3,hist_max); l3_3->SetLineStyle(3); l3_3->SetLineColor(kGray+1); l3_3->Draw("same");
+  TLine *l4_3 = new TLine(4,0,4,hist_max); l4_3->SetLineStyle(3); l4_3->SetLineColor(kGray+1); l4_3->Draw("same");
+  TLine *l5_3 = new TLine(5,0,5,hist_max); l5_3->SetLineStyle(3); l5_3->SetLineColor(kGray+1); l5_3->Draw("same");
+  TLine *l6_3 = new TLine(6,0,6,hist_max); l6_3->SetLineStyle(3); l6_3->SetLineColor(kGray+1); l6_3->Draw("same");
+  TLine *l7_3 = new TLine(7,0,7,hist_max); l7_3->SetLineStyle(3); l7_3->SetLineColor(kGray+1); l7_3->Draw("same");
+
+  //TPaveText *txttrueEl = new TPaveText( 0.2, 0.85*hist_max, 0.8, 0.98*hist_max, "NB" ); txttrueEl->AddText(" e "); ((TText*)txttrueEl->GetListOfLines()->Last())->SetTextColor(kRed);
+  //TPaveText *txttrueMu = new TPaveText( 1.2, 0.85*hist_max, 1.8, 0.98*hist_max, "NB" ); txttrueMu->AddText(" #mu "); ((TText*)txttrueMu->GetListOfLines()->Last())->SetTextColor(kRed);
+  TPaveText *txttruePh = new TPaveText( 2.2, 0.85*hist_max, 2.8, 0.98*hist_max, "NB" ); txttruePh->AddText(" ph "); ((TText*)txttruePh->GetListOfLines()->Last())->SetTextColor(kRed); txttruePh->Draw();
+  TPaveText *txttruePi0 = new TPaveText( 3.2, 0.85*hist_max, 3.8, 0.98*hist_max, "NB" ); txttruePi0->AddText("pi0"); ((TText*)txttruePi0->GetListOfLines()->Last())->SetTextColor(kRed); txttruePi0->Draw();
+  TPaveText *txttruePiP = new TPaveText( 4.2, 0.85*hist_max, 4.8, 0.98*hist_max, "NB" ); txttruePiP->AddText("pi+"); ((TText*)txttruePiP->GetListOfLines()->Last())->SetTextColor(kRed); txttruePiP->Draw();
+  TPaveText *txttruePiM = new TPaveText( 5.2, 0.85*hist_max, 5.8, 0.98*hist_max, "NB" ); txttruePiM->AddText("pi-"); ((TText*)txttruePiM->GetListOfLines()->Last())->SetTextColor(kRed); txttruePiM->Draw();
+  //TPaveText *txttruePr = new TPaveText( 6.2, 0.85*hist_max, 6.8, 0.98*hist_max, "NB" ); txttruePr->AddText(" p "); ((TText*)txttruePr->GetListOfLines()->Last())->SetTextColor(kRed);
+  TPaveText *txttrueO = new TPaveText( 7.2, 0.85*hist_max, 7.8, 0.98*hist_max, "NB" ); txttrueO->AddText("0#pi#gamma"); ((TText*)txttrueO->GetListOfLines()->Last())->SetTextColor(kRed); txttrueO->Draw();
+
+  hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs->Draw("hist same");
+  gPad->Print("hOtherSelCCNotSignal_Selct0Pi_TruePionPDGs.pdf");
+
+
 
 
   std::cout << " ----------------------------------- " << std::endl;

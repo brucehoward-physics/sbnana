@@ -184,7 +184,7 @@ const Binning kBinsRTLen = Binning::Simple(31,-0.05,3.05);
 const Binning kBinsStubLen = Binning::Simple(10,0.,5.);
 const Binning kBinsStubDQDx = Binning::Simple(16,0.,8.e5);
 
-const Binning kBinsPDGType = Binning::Simple(7,0,7);
+const Binning kBinsPDGType = Binning::Simple(8,0,8);
 
 const Binning kBinsP_Custom = Binning::Custom({0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 2.5, 3.5});
 
@@ -733,12 +733,30 @@ const Var kRecoMuonBestMatchPDG([](const caf::SRSliceProxy* slc) -> float {
       else if ( abs(trk.truth.p.pdg) == 13 )   pdg = 1.;
       else if ( abs(trk.truth.p.pdg) == 22 )   pdg = 2.;
       else if ( abs(trk.truth.p.pdg) == 111 )  pdg = 3.;
-      else if ( abs(trk.truth.p.pdg) == 211 )  pdg = 4.;
-      else if ( abs(trk.truth.p.pdg) == 2212 ) pdg = 5.;
-      else                                     pdg = 6.;
+      else if ( trk.truth.p.pdg == 211 )       pdg = 4.;
+      else if ( trk.truth.p.pdg == -211 )      pdg = 5.;
+      else if ( abs(trk.truth.p.pdg) == 2212 ) pdg = 6.;
+      else                                     pdg = 7.;
     }
 
     return pdg + std::numeric_limits<float>::epsilon();
+  });
+
+const MultiVar kTrueParticlePionPDGs([](const caf::SRSliceProxy* slc) {
+    std::vector<double> pdgs;
+
+    if ( slc->truth.index < 0 ) return pdgs;
+
+    for ( auto const& prim : slc->truth.prim ) {
+      if ( abs(prim.pdg) == 22 ) pdgs.push_back( 2. + std::numeric_limits<double>::epsilon() );
+      if ( abs(prim.pdg) == 111 ) pdgs.push_back( 3. + std::numeric_limits<double>::epsilon() );
+      if ( prim.pdg == 211 ) pdgs.push_back( 4. + std::numeric_limits<double>::epsilon() );
+      if ( prim.pdg == -211 ) pdgs.push_back( 5. + std::numeric_limits<double>::epsilon() );
+    }
+
+    if ( pdgs.size() == 0 ) pdgs.push_back( 8. + std::numeric_limits<double>::epsilon() );
+
+    return pdgs;
   });
 
 const Var kRecoMuonPNew([](const caf::SRSliceProxy* slc) -> float {
@@ -807,10 +825,10 @@ const Var kPTrackIndNewProton([](const caf::SRSliceProxy* slc) -> int {
 
       float angle = -5.0;
       if ( primaryInd >= 0 ) {
-	const unsigned int idxPrim = (unsigned int)primaryInd;
-	TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
-	TVector3 pDir( slc->reco.trk[idxTrk].dir.x, slc->reco.trk[idxTrk].dir.y, slc->reco.trk[idxTrk].dir.z );
-	angle = TMath::Cos(muDir.Angle(pDir));
+        const unsigned int idxPrim = (unsigned int)primaryInd;
+        TVector3 muDir( slc->reco.trk[idxPrim].dir.x, slc->reco.trk[idxPrim].dir.y, slc->reco.trk[idxPrim].dir.z );
+        TVector3 pDir( slc->reco.trk[idxTrk].dir.x, slc->reco.trk[idxTrk].dir.y, slc->reco.trk[idxTrk].dir.z );
+        angle = TMath::Cos(muDir.Angle(pDir));
       }
 
       // do we want to make the proton cut even tighter on PID
@@ -1994,6 +2012,8 @@ const Cut kNuMISelection = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDi
 const Cut kNuMISelectionContained = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew && kProtonTrack && kRecoMuonContained );
 const Cut kNuMISelection_TrueSignal = kCutTrueSig && kNuMISelection;
 
+const Cut kNuMISelection_NoTrkDirY = ( kRFiducialNew && kNotClearCosmic && kPTrackNew && kProtonTrack );
+
 // 1Mu1P (well really 1MuNP with a minimum P threshold) selection
 const Cut kNuMI1Mu1PSelection = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew && kProtonTrack400MeV );
 
@@ -3029,6 +3049,26 @@ const Cut kNoAppreciableShower_0Pi([](const caf::SRSliceProxy* slc) {
     return false;
   });
 
+const Cut kCutScdyAndNonProtonShowers_0Pi([](const caf::SRSliceProxy* slc) {
+    unsigned int nonPrimaryShw = 0;
+    unsigned int nonProtonLikeShowers = 0;
+
+    for ( auto const& shw : slc->reco.shw ) 
+    {
+      const float Atslc = std::hypot(slc->vertex.x - shw.start.x,
+                                     slc->vertex.y - shw.start.y,
+                                     slc->vertex.z - shw.start.z);
+
+      if ( Atslc < 15. && shw.bestplane_energy > 0.030 ) {
+        if ( !shw.pfp.parent_is_primary ) nonPrimaryShw+=1;
+        else if ( shw.density < 7.0 ) nonProtonLikeShowers+=1;
+      }
+    }
+
+    if ( nonPrimaryShw==0 && nonProtonLikeShowers==0 ) return true;
+    return false;
+  });
+
 const Cut kNonMuonTracksAreProtons([](const caf::SRSliceProxy* slc) {
     int primaryInd = kPTrackIndNew(slc);
     if ( primaryInd < 0 ) return false;
@@ -3066,5 +3106,101 @@ const Cut kNonMuonTracksAreProtons([](const caf::SRSliceProxy* slc) {
   });
 
 // const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && kPTrackNew_0Pi && kProtonTrack );
+
+// This looked good but I am doubtful of the no appreciable showers cut...
+// const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
+//                                  kPTrackNew && kProtonTrack && kNoAppreciableShower_0Pi && kNonMuonTracksAreProtons );
+
+// const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
+//                                  kPTrackNew && kProtonTrack && kNonMuonTracksAreProtons );
+
 const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
-                                 kPTrackNew && kProtonTrack && kNoAppreciableShower_0Pi && kNonMuonTracksAreProtons );
+                                 kPTrackNew && kProtonTrack && kCutScdyAndNonProtonShowers_0Pi && kNonMuonTracksAreProtons );
+
+const Cut kNuMISelection_0Pi_NoTrkDirY = ( kRFiducialNew && kNotClearCosmic && kPTrackNew && kProtonTrack &&
+                                           kCutScdyAndNonProtonShowers_0Pi && kNonMuonTracksAreProtons );
+
+/////////
+// EXPLORATION
+
+const Cut kNonMuonTracksAreProtons__PRINT([](const caf::SRSliceProxy* slc) {
+    int primaryInd = kPTrackIndNew(slc);
+    if ( primaryInd < 0 ) return false;
+    unsigned int idxPrim = (unsigned int)primaryInd;
+
+    int secondaryInd = kPTrackIndNewProton(slc);
+    if ( secondaryInd < 0 ) return false;
+    unsigned int idxScdy = (unsigned int)secondaryInd;
+
+    bool shouldCutEvt = false;
+
+    // Check to see if any of the non-muon candidates is inconsistent with a proton 
+    for ( unsigned int idxTrk = 0; idxTrk < slc->reco.trk.size(); ++idxTrk ) {
+      if ( idxTrk == idxPrim ) continue; // muon should be muon-like...
+      if ( idxTrk == idxScdy ) continue; // proton we ID...
+
+      auto const& trk = slc->reco.trk.at(idxTrk);
+      if(trk.bestplane == -1) continue; // can't determine chi2 for this track... sigh.
+
+      const float Atslc = std::hypot(slc->vertex.x - trk.start.x,
+				                             slc->vertex.y - trk.start.y,
+				                             slc->vertex.z - trk.start.z);
+      const bool Contained = ( !isnan(trk.end.x) &&
+			                         ((trk.end.x < -61.94 - 10 && trk.end.x > -358.49 + 10) ||
+			                        	(trk.end.x >  61.94 + 10 && trk.end.x <  358.49 - 10)) &&
+			                         !isnan(trk.end.y) &&
+			                         ( trk.end.y > -181.86 + 10 && trk.end.y < 134.96 - 10 ) &&
+			                         !isnan(trk.end.z) &&
+			                         ( trk.end.z > -894.95 + 10 && trk.end.z < 894.95 - 10 ) );
+
+      if ( Atslc >= 10.0 || !trk.pfp.parent_is_primary ) continue; // not a primary so we choose to move on
+
+      // Now check if it's actually proton like and return false if not...
+      const float Chi2Proton = trk.chi2pid[trk.bestplane].chi2_proton;
+      const float Chi2Muon = trk.chi2pid[trk.bestplane].chi2_muon;
+      if ( Chi2Proton > 100. || Chi2Muon < 30. ) shouldCutEvt=true;
+      else {
+        // INFO ON CALO WE WANT TO PRINT OUT...
+        const int pdg = trk.truth.p.pdg;
+        for ( auto const& point : trk.calo[trk.bestplane].points ) {
+          std::cout << pdg << ", " << point.rr << ", " << point.dedx << std::endl;
+        }
+      }
+    }
+
+    if ( shouldCutEvt ) return false;
+    // All our primary tracks are proton-like, we're good!
+    return true;
+  });
+
+const Cut kTertiaryParticleShowers__PRINT([](const caf::SRSliceProxy* slc) {
+    int primaryInd = kPTrackIndNew(slc);
+    if ( primaryInd < 0 ) return false;
+    unsigned int idxPrim = (unsigned int)primaryInd;
+
+    int secondaryInd = kPTrackIndNewProton(slc);
+    if ( secondaryInd < 0 ) return false;
+    unsigned int idxScdy = (unsigned int)secondaryInd;
+
+    // Now check out 'appreciable' showers near the vertex
+    for ( auto const& shw : slc->reco.shw ) 
+    {
+      const float Atslc = std::hypot(slc->vertex.x - shw.start.x,
+                                     slc->vertex.y - shw.start.y,
+                                     slc->vertex.z - shw.start.z);
+
+      if ( Atslc > 15. || !shw.pfp.parent_is_primary || shw.bestplane_energy < 0.030 ) continue;
+
+      const int pdg = shw.truth.p.pdg;
+      std::cout << pdg << ", " << shw.bestplane_energy << ", " << shw.bestplane_dEdx << ", "
+                << shw.density << ", " << shw.conversion_gap << ", " << shw.open_angle << std::endl;
+    }
+
+    return true;
+  });
+
+const Cut kNuMISelection_0Pi__PRINT = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
+                                        kPTrackNew && kProtonTrack && kNonMuonTracksAreProtons__PRINT );
+
+//const Cut kNuMISelection_0Pi__PRINT = ( kRFiducialNew && kNotClearCosmic && kCutCRLongTrkDirY && 
+//                                        kPTrackNew && kProtonTrack && kNonMuonTracksAreProtons && kTertiaryParticleShowers__PRINT );
