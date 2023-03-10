@@ -3120,6 +3120,163 @@ const Cut kNuMISelection_0Pi = ( kRFiducialNew && kNotClearCosmic && kCutCRLongT
 const Cut kNuMISelection_0Pi_NoTrkDirY = ( kRFiducialNew && kNotClearCosmic && kPTrackNew && kProtonTrack &&
                                            kCutScdyAndNonProtonShowers_0Pi && kNonMuonTracksAreProtons );
 
+
+// Signal and efficiency definitions ... 0Pi
+/////////////////////////////////////////////
+
+// all signal
+const SpillMultiVar kTrueSignalEnu_0Pi ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalEnu;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( !(abs(nu.pdg) == 14 &&
+           nu.iscc &&
+           !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+           isInFV(nu.position.x,nu.position.y,nu.position.z) ) )
+      continue;
+
+    unsigned int nMu(0), nP(0), nPi0(0), nChgPi(0);
+    for ( auto const& prim : nu.prim ) {
+      if ( abs(prim.pdg) == 13 ) nMu+=1;
+      if ( abs(prim.pdg) == 2212 ) nP+=1;
+      if ( abs(prim.pdg) == 111 ) nPi0+=1;
+      if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+    }
+
+    if ( nMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0 ) signalEnu.push_back( nu.E );
+  }
+
+  return signalEnu;
+});
+
+const SpillMultiVar kTrueSignalEnu_0Pi_LeptonTrueSignal ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalEnu;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( !(abs(nu.pdg) == 14 &&
+           nu.iscc &&
+           !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+           isInFV(nu.position.x,nu.position.y,nu.position.z) ) )
+      continue;
+
+    unsigned int nMu(0), nSigMu(0), nP(0), nPi0(0), nChgPi(0);
+    for ( auto const& prim : nu.prim ) {
+      if ( abs(prim.pdg) == 13 ) {
+        nMu+=1;
+        if ( (prim.contained && prim.length > 50.) || (prim.length > 100.) ) nSigMu+=1;
+      }
+      if ( abs(prim.pdg) == 2212 ) nP+=1;
+      if ( abs(prim.pdg) == 111 ) nPi0+=1;
+      if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+    }
+
+    if ( nMu==1 && nSigMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0 ) signalEnu.push_back( nu.E );
+  }
+
+  return signalEnu;
+});
+
+// selected signal
+const SpillMultiVar kTrueSignalEnu_0Pi_Selected ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalEnu;
+  std::map<int, double> signalIndexE;
+  unsigned int count = 0;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( !(abs(nu.pdg) == 14 &&
+           nu.iscc &&
+           !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+           isInFV(nu.position.x,nu.position.y,nu.position.z) ) )
+      continue;
+
+    unsigned int nMu(0), nP(0), nPi0(0), nChgPi(0);
+    for ( auto const& prim : nu.prim ) {
+      if ( abs(prim.pdg) == 13 ) nMu+=1;
+      if ( abs(prim.pdg) == 2212 ) nP+=1;
+      if ( abs(prim.pdg) == 111 ) nPi0+=1;
+      if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+    }
+
+    if ( nMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0 ) {
+      signalIndexE[ nu.index ] = nu.E;
+      count+=1;
+    }
+  }
+
+  if ( count == 0 ) return signalEnu;
+
+  for ( auto const& slc : sr->slc ) {
+    if ( slc.truth.index < 0 ) continue;
+    else if ( signalIndexE.find( slc.truth.index ) == signalIndexE.end() ) continue;
+
+    // Check if slice passes cuts:
+    if ( kRFiducialNew(&slc) &&
+         kNotClearCosmic(&slc) &&
+         kCutCRLongTrkDirY(&slc) &&
+         kPTrackNew(&slc) &&
+         kProtonTrack(&slc) &&
+         kCutScdyAndNonProtonShowers_0Pi(&slc) &&
+         kNonMuonTracksAreProtons(&slc) ) {
+      signalEnu.push_back( slc.truth.E );
+      signalIndexE.erase( slc.truth.index ); // should prevent duplicates
+    }
+  }
+
+  return signalEnu;
+});
+
+const SpillMultiVar kTrueSignalEnu_0Pi_LeptonTrueSignal_Selected ( [](const caf::SRSpillProxy *sr) {
+  std::vector<double> signalEnu;
+  std::map<int, double> signalIndexE;
+  unsigned int count = 0;
+
+  for ( auto const& nu : sr->mc.nu ) {
+    if ( !(abs(nu.pdg) == 14 &&
+           nu.iscc &&
+           !std::isnan(nu.position.x) && !std::isnan(nu.position.y) && !std::isnan(nu.position.z) &&
+           isInFV(nu.position.x,nu.position.y,nu.position.z) ) )
+      continue;
+
+    unsigned int nMu(0), nSigMu(0), nP(0), nPi0(0), nChgPi(0);
+    for ( auto const& prim : nu.prim ) {
+      if ( abs(prim.pdg) == 13 ) {
+        nMu+=1;
+        if ( (prim.contained && prim.length > 50.) || (prim.length > 100.) ) nSigMu+=1;
+      }
+      if ( abs(prim.pdg) == 2212 ) nP+=1;
+      if ( abs(prim.pdg) == 111 ) nPi0+=1;
+      if ( abs(prim.pdg) == 211 ) nChgPi+=1;
+    }
+
+    if ( nMu==1 && nSigMu==1 && nP>=1 && nPi0 == 0 && nChgPi == 0 ) {
+      signalIndexE[ nu.index ] = nu.E;
+      count+=1;
+    }
+  }
+
+  if ( count == 0 ) return signalEnu;
+
+  for ( auto const& slc : sr->slc ) {
+    if ( slc.truth.index < 0 ) continue;
+    else if ( signalIndexE.find( slc.truth.index ) == signalIndexE.end() ) continue;
+
+    // Check if slice passes cuts:
+    if ( kRFiducialNew(&slc) &&
+         kNotClearCosmic(&slc) &&
+         kCutCRLongTrkDirY(&slc) &&
+         kPTrackNew(&slc) &&
+         kProtonTrack(&slc) &&
+         kCutScdyAndNonProtonShowers_0Pi(&slc) &&
+         kNonMuonTracksAreProtons(&slc) ) {
+      signalEnu.push_back( slc.truth.E );
+      signalIndexE.erase( slc.truth.index ); // should prevent duplicates
+    }
+  }
+
+  return signalEnu;
+});
+
+
 /////////
 // EXPLORATION
 

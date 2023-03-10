@@ -61,9 +61,9 @@ double pot = 3.0e20; // assume 6e19 per month, then 5 months is 3e20
 
 // NU + COSMIC
 // BIGGER DATA SET
-//const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
+const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*[0,1,2,3,4]*/*/flat*.root";
 // FROM JAESUNG
-const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
+//const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*.root";
 //const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_Nu_Cosmics/flatcaf/v09_37_02_04/icarus_numi_nu_cosmics_v09_37_02_04_caf/flat*1*.root";
 
 // NU + Cosmic ** Without ** the overburden
@@ -76,9 +76,9 @@ const std::string loadstr_ICARUS = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_
 // In-time cosmic:
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*[1,2,3]*/flat*.root";
 // FROM JAESUNG
-const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*1*.root"; //"[0,1,2,3,4]*.root";
+//const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*1*.root"; //"[0,1,2,3,4]*.root";
 // & higher stats
-//const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*.root";
+const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/mc/NUMI_in-time_Cosmics_withOverburden2/flatcaf/v09_37_02_07/IcarusProd_2022A_NUMI_in-time_Cosmics_withOverburden_v09_37_02_07_caf/flatcaf*.root";
 
 // In-time cosmic ** Without ** the overburden
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*/flat*.root";
@@ -91,14 +91,80 @@ const std::string loadstr_ICARUS_intime = "/pnfs/icarus/persistent/users/jskim/m
 //const std::string loadstr_ICARUS = "/pnfs/sbn/data/sbn_fd/poms_production/NuMI_Nu_Cosmics_Ovb/mc/reconstructed/icaruscode/v09_37_02_04/flatcaf/*0*/*[0,1,2]*/flat*.root";
 //const std::string loadstr_ICARUS_intime = "/pnfs/sbn/data/sbn_fd/poms_production/NUMI_in-time_Cosmics_withOverburden2/mc/reconstructed/icaruscode/v09_37_02_07/flatcaf/*0*/*1*/flat*.root";
 
-const bool fRun = false; //false; //true;
+const bool fRun = true; //false; //true;
 
 void study ()
 {
   if ( fRun ) {
+
+    TH1* fFluxWeight[2][2][2]; // [fhc/rhc][nue/numu][nu/nubar]
+    const char* sbndata = std::getenv("SBNDATA_DIR");
+    if(!sbndata){
+      std::cout << "NuMIFluxSysts: $SBNDATA_DIR environment variable not set. Please setup the sbndata product." << std::endl;
+      std::abort();
+    }
+
+    const std::string fname = std::string(sbndata)+"/beamData/NuMIdata/icarus_numi_flux_syst_ana.root";
+    TFile f(fname.c_str());
+    if(f.IsZombie()){
+      std::cout << "NuMIFluxSysts: Failed to open " << fname << std::endl;
+      std::abort();
+    }
+
+    for(int hcIdx: {0, 1}){
+      for(int flavIdx: {0, 1}){
+        for(int signIdx: {0, 1}){
+          std::string hName = "ppfx_output/run15/";
+          std::string hNameExtra = "";
+          if(hcIdx == 0) hName += "fhc/nom/"; else hName += "rhc/nom/";
+
+          if(flavIdx == 0) hNameExtra += "nue"; else hNameExtra += "numu";
+          if(signIdx == 1) hNameExtra += "bar";
+
+          TH1* h_cv = (TH1*)f.Get( (hName+"hcv_"+hNameExtra).c_str() );
+          if(!h_cv){
+            std::cout << "NuMIFluxSysts: failed to find " << hName <<  "hcv_" << hNameExtra << " in " << f.GetName() << std::endl;
+            std::abort();
+          }
+          h_cv = (TH1*)h_cv->Clone(UniqueName().c_str());
+          h_cv->SetDirectory(0);
+
+          TH1* h_nom = (TH1*)f.Get( (hName+"hnom_"+hNameExtra).c_str() );
+          if(!h_nom){
+            std::cout << "NuMIFluxSysts: failed to find " << hName <<  "hnom_" << hNameExtra << " in " << f.GetName() << std::endl;
+            std::abort();
+          }
+
+          h_cv->Divide(h_nom);
+
+          fFluxWeight[hcIdx][flavIdx][signIdx] = h_cv;
+        }
+      }
+    }
+
+    Var kGetFluxWeight( [&fFluxWeight](const caf::SRSliceProxy* slc) -> double
+                        {
+                          if ( slc->truth.index < 0 || abs(slc->truth.initpdg) == 16 ) return 1.0;
+
+                          if ( !fFluxWeight[0][0][0] ) {
+                            std::cout << "Trying to access un-available weight array..." << std::endl;
+                            std::abort();
+                          }
+
+                          unsigned int hcIdx = 0; // assume always FHC for now...
+                          unsigned int flavIdx = ( abs(slc->truth.initpdg) == 12 ) ? 0 : 1;
+                          unsigned int signIdx = ( slc->truth.initpdg > 0 ) ? 0 : 1;
+
+                          TH1* h = fFluxWeight[hcIdx][flavIdx][signIdx];
+                          assert(h);
+
+                          const int bin = h->FindBin( slc->truth.E );
+                          if(bin == 0 || bin == h->GetNbinsX()+1) return 1.0;
+                          return h->GetBinContent(bin);
+                        });
+
     SpectrumLoader loader( loadstr_ICARUS );
     SpectrumLoader loaderInTime( loadstr_ICARUS_intime );
-
 
     // MAKE SPECTRA
     ////////////////////
@@ -308,6 +374,43 @@ void study ()
 
     Spectrum sNuCC_1muNp0pi_Selct0Pi   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutSignal_1muNp0pi && kNuMISelection_0Pi );
     Spectrum sNuCC_Not1muNp0pi_Selct0Pi( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi );
+
+    // VERSION WITH ATTEMPT AT FLUX WEIGHT
+    Spectrum sAll_Selct0Pi_FWt      ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sCosmic_Selct0Pi_FWt   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutCosmic && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sInTime_Selct0Pi_FWt   ( "Reco Momentum [GeV/c]", kBinsP, loaderInTime, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+
+    Spectrum sSignalQEL_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigQEL && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sSignalMEC_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigMEC && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sSignalRES_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sSignalDIS_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sSignalCOH_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+
+    Spectrum sOtherNuCC_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCCButNotSigAll && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sOtherNuNC_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueNC && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+
+    Spectrum sNuCC_1muNp0pi_Selct0Pi_FWt   ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutSignal_1muNp0pi && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+    Spectrum sNuCC_Not1muNp0pi_Selct0Pi_FWt( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutNuCC_Not_1muNp0pi && kNuMISelection_0Pi, kNoShift, kGetFluxWeight );
+
+    // --overlaps
+    Spectrum sSignalQEL_Selct0Pi_Signal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigQEL && kNuMISelection_0Pi && kCutSignal_1muNp0pi );
+    Spectrum sSignalMEC_Selct0Pi_Signal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigMEC && kNuMISelection_0Pi && kCutSignal_1muNp0pi );
+    Spectrum sSignalRES_Selct0Pi_Signal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection_0Pi && kCutSignal_1muNp0pi );
+    Spectrum sSignalDIS_Selct0Pi_Signal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection_0Pi && kCutSignal_1muNp0pi );
+    Spectrum sSignalCOH_Selct0Pi_Signal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection_0Pi && kCutSignal_1muNp0pi );
+
+    Spectrum sSignalQEL_Selct0Pi_NotSignal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigQEL && kNuMISelection_0Pi && !kCutSignal_1muNp0pi );
+    Spectrum sSignalMEC_Selct0Pi_NotSignal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigMEC && kNuMISelection_0Pi && !kCutSignal_1muNp0pi );
+    Spectrum sSignalRES_Selct0Pi_NotSignal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigRES && kNuMISelection_0Pi && !kCutSignal_1muNp0pi );
+    Spectrum sSignalDIS_Selct0Pi_NotSignal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigDIS && kNuMISelection_0Pi && !kCutSignal_1muNp0pi );
+    Spectrum sSignalCOH_Selct0Pi_NotSignal( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kCutTrueSigCOH && kNuMISelection_0Pi && !kCutSignal_1muNp0pi );
+
+    // --other stuff?
+    Spectrum sSignal0Pi_TrueENu_NoCut( "True E_{#nu} [GeV]", kBinsP, loader, kTrueSignalEnu_0Pi, kNoSpillCut );
+    Spectrum sSignal0Pi_TrueENu_Selct( "True E_{#nu} [GeV]", kBinsP, loader, kTrueSignalEnu_0Pi_Selected, kNoSpillCut );
+
+    Spectrum sSignal0Pi_TrueENu_TrueLept_NoCut( "True E_{#nu} [GeV]", kBinsP, loader, kTrueSignalEnu_0Pi_LeptonTrueSignal, kNoSpillCut );
+    Spectrum sSignal0Pi_TrueENu_TrueLept_Selct( "True E_{#nu} [GeV]", kBinsP, loader, kTrueSignalEnu_0Pi_LeptonTrueSignal_Selected, kNoSpillCut );
 
     // 0Pi attempted version --> WITHOUT CR TRK DIR Y CUT
     Spectrum sAll_Selct0PiNoTrkY      ( "Reco Momentum [GeV/c]", kBinsP, loader, kRecoMuonPNew, kNoSpillCut, kNuMISelection_0Pi_NoTrkDirY );
@@ -631,8 +734,39 @@ void study ()
     sOtherNuCC_Selct0Pi.SaveTo( fSpec->mkdir("sOtherNuCC_Selct0Pi") );
     sOtherNuNC_Selct0Pi.SaveTo( fSpec->mkdir("sOtherNuNC_Selct0Pi") );
 
+    sAll_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sAll_Selct0Pi_FWt") );
+    sCosmic_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sCosmic_Selct0Pi_FWt") );
+    sInTime_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sInTime_Selct0Pi_FWt") );
+    sSignalQEL_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sSignalQEL_Selct0Pi_FWt") );
+    sSignalMEC_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sSignalMEC_Selct0Pi_FWt") );
+    sSignalRES_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sSignalRES_Selct0Pi_FWt") );
+    sSignalDIS_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sSignalDIS_Selct0Pi_FWt") );
+    sSignalCOH_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sSignalCOH_Selct0Pi_FWt") );
+    sOtherNuCC_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sOtherNuCC_Selct0Pi_FWt") );
+    sOtherNuNC_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sOtherNuNC_Selct0Pi_FWt") );
+    sNuCC_1muNp0pi_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sNuCC_1muNp0pi_Selct0Pi_FWt") );
+    sNuCC_Not1muNp0pi_Selct0Pi_FWt.SaveTo( fSpec->mkdir("sNuCC_Not1muNp0pi_Selct0Pi_FWt") );
+
+    sSignalQEL_Selct0Pi_Signal.SaveTo( fSpec->mkdir("sSignalQEL_Selct0Pi_Signal") );
+    sSignalMEC_Selct0Pi_Signal.SaveTo( fSpec->mkdir("sSignalMEC_Selct0Pi_Signal") );
+    sSignalRES_Selct0Pi_Signal.SaveTo( fSpec->mkdir("sSignalRES_Selct0Pi_Signal") );
+    sSignalDIS_Selct0Pi_Signal.SaveTo( fSpec->mkdir("sSignalDIS_Selct0Pi_Signal") );
+    sSignalCOH_Selct0Pi_Signal.SaveTo( fSpec->mkdir("sSignalCOH_Selct0Pi_Signal") );
+
+    sSignalQEL_Selct0Pi_NotSignal.SaveTo( fSpec->mkdir("sSignalQEL_Selct0Pi_NotSignal") );
+    sSignalMEC_Selct0Pi_NotSignal.SaveTo( fSpec->mkdir("sSignalMEC_Selct0Pi_NotSignal") );
+    sSignalRES_Selct0Pi_NotSignal.SaveTo( fSpec->mkdir("sSignalRES_Selct0Pi_NotSignal") );
+    sSignalDIS_Selct0Pi_NotSignal.SaveTo( fSpec->mkdir("sSignalDIS_Selct0Pi_NotSignal") );
+    sSignalCOH_Selct0Pi_NotSignal.SaveTo( fSpec->mkdir("sSignalCOH_Selct0Pi_NotSignal") );
+
     sNuCC_1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_1muNp0pi_Selct0Pi") );
     sNuCC_Not1muNp0pi_Selct0Pi.SaveTo( fSpec->mkdir("sNuCC_Not1muNp0pi_Selct0Pi") );
+
+    sSignal0Pi_TrueENu_NoCut.SaveTo( fSpec->mkdir("sSignal0Pi_TrueENu_NoCut") );
+    sSignal0Pi_TrueENu_Selct.SaveTo( fSpec->mkdir("sSignal0Pi_TrueENu_Selct") );
+
+    sSignal0Pi_TrueENu_TrueLept_NoCut.SaveTo( fSpec->mkdir("sSignal0Pi_TrueENu_TrueLept_NoCut") );
+    sSignal0Pi_TrueENu_TrueLept_Selct.SaveTo( fSpec->mkdir("sSignal0Pi_TrueENu_TrueLept_Selct") );
 
     sAll_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sAll_Selct0PiNoTrkY") );
     sCosmic_Selct0PiNoTrkY.SaveTo( fSpec->mkdir("sCosmic_Selct0PiNoTrkY") );
@@ -771,6 +905,15 @@ void study ()
     sSignalDIS_SelRes.SaveTo( fSpec->mkdir("sSignalDIS_SelRes") );
     sSignalCOH_SelRes.SaveTo( fSpec->mkdir("sSignalCOH_SelRes") );
 
+    fFluxWeight[0][0][0]->Write( "flux_weight_fhc_nue" );
+    fFluxWeight[0][0][1]->Write( "flux_weight_fhc_nuebar" );
+    fFluxWeight[0][1][0]->Write( "flux_weight_fhc_numu" );
+    fFluxWeight[0][1][1]->Write( "flux_weight_fhc_numubar" );
+    fFluxWeight[1][0][0]->Write( "flux_weight_rhc_nue" );
+    fFluxWeight[1][0][1]->Write( "flux_weight_rhc_nuebar" );
+    fFluxWeight[1][1][0]->Write( "flux_weight_rhc_numu" );
+    fFluxWeight[1][1][1]->Write( "flux_weight_rhc_numubar" );
+
     fSpec->Close();
   }
 
@@ -807,6 +950,37 @@ void study ()
   Spectrum *sNuCC_1muNp0pi_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sNuCC_1muNp0pi_Selct0Pi").release();
   Spectrum *sNuCC_Not1muNp0pi_Selct0Pi = LoadFromFile<Spectrum>(fLoad,"sNuCC_Not1muNp0pi_Selct0Pi").release();
 
+
+  Spectrum *sAll_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sAll_Selct0Pi_FWt").release();
+  Spectrum *sCosmic_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sCosmic_Selct0Pi_FWt").release();
+  Spectrum *sInTime_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sInTime_Selct0Pi_FWt").release();
+  Spectrum *sSignalQEL_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sSignalQEL_Selct0Pi_FWt").release();
+  Spectrum *sSignalMEC_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sSignalMEC_Selct0Pi_FWt").release();
+  Spectrum *sSignalRES_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sSignalRES_Selct0Pi_FWt").release();
+  Spectrum *sSignalDIS_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct0Pi_FWt").release();
+  Spectrum *sSignalCOH_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct0Pi_FWt").release();
+  Spectrum *sOtherNuCC_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sOtherNuCC_Selct0Pi_FWt").release();
+  Spectrum *sOtherNuNC_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sOtherNuNC_Selct0Pi_FWt").release();
+  Spectrum *sNuCC_1muNp0pi_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sNuCC_1muNp0pi_Selct0Pi_FWt").release();
+  Spectrum *sNuCC_Not1muNp0pi_Selct0Pi_FWt = LoadFromFile<Spectrum>(fLoad,"sNuCC_Not1muNp0pi_Selct0Pi_FWt").release();
+
+  Spectrum *sSignalQEL_Selct0Pi_Signal = LoadFromFile<Spectrum>(fLoad,"sSignalQEL_Selct0Pi_Signal").release();
+  Spectrum *sSignalMEC_Selct0Pi_Signal = LoadFromFile<Spectrum>(fLoad,"sSignalMEC_Selct0Pi_Signal").release();
+  Spectrum *sSignalRES_Selct0Pi_Signal = LoadFromFile<Spectrum>(fLoad,"sSignalRES_Selct0Pi_Signal").release();
+  Spectrum *sSignalDIS_Selct0Pi_Signal = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct0Pi_Signal").release();
+  Spectrum *sSignalCOH_Selct0Pi_Signal = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct0Pi_Signal").release();
+
+  Spectrum *sSignalQEL_Selct0Pi_NotSignal = LoadFromFile<Spectrum>(fLoad,"sSignalQEL_Selct0Pi_NotSignal").release();
+  Spectrum *sSignalMEC_Selct0Pi_NotSignal = LoadFromFile<Spectrum>(fLoad,"sSignalMEC_Selct0Pi_NotSignal").release();
+  Spectrum *sSignalRES_Selct0Pi_NotSignal = LoadFromFile<Spectrum>(fLoad,"sSignalRES_Selct0Pi_NotSignal").release();
+  Spectrum *sSignalDIS_Selct0Pi_NotSignal = LoadFromFile<Spectrum>(fLoad,"sSignalDIS_Selct0Pi_NotSignal").release();
+  Spectrum *sSignalCOH_Selct0Pi_NotSignal = LoadFromFile<Spectrum>(fLoad,"sSignalCOH_Selct0Pi_NotSignal").release();
+
+  Spectrum *sSignal0Pi_TrueENu_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal0Pi_TrueENu_NoCut").release();
+  Spectrum *sSignal0Pi_TrueENu_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal0Pi_TrueENu_Selct").release();
+
+  Spectrum *sSignal0Pi_TrueENu_TrueLept_NoCut = LoadFromFile<Spectrum>(fLoad,"sSignal0Pi_TrueENu_TrueLept_NoCut").release();
+  Spectrum *sSignal0Pi_TrueENu_TrueLept_Selct = LoadFromFile<Spectrum>(fLoad,"sSignal0Pi_TrueENu_TrueLept_Selct").release();
 
   Spectrum *sAll_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sAll_Selct0PiNoTrkY").release();
   Spectrum *sCosmic_Selct0PiNoTrkY = LoadFromFile<Spectrum>(fLoad,"sCosmic_Selct0PiNoTrkY").release();
@@ -1090,6 +1264,9 @@ void study ()
   TH1* hAll_Selct0Pi      = sAll_Selct0Pi->ToTH1( pot, kBlack );
   hAll_Selct0Pi->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
+  TH1* hAll_Selct0Pi_FWt      = sAll_Selct0Pi_FWt->ToTH1( pot, kBlack );
+  hAll_Selct0Pi_FWt->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
+
   TH1* hAll_Selct0PiNoTrkY      = sAll_Selct0PiNoTrkY->ToTH1( pot, kBlack );
   hAll_Selct0PiNoTrkY->GetYaxis()->SetTitle( TString::Format("Slices / %.3fe20 POT",pot/1.0e20) );
 
@@ -1303,6 +1480,41 @@ void study ()
   TH1* hNuCC_1muNp0pi_Selct0Pi = sNuCC_1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[0] ); hNuCC_1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[0]);
   TH1* hNuCC_Not1muNp0pi_Selct0Pi = sNuCC_Not1muNp0pi_Selct0Pi->ToTH1( pot, colorwheel_mode[3] ); hNuCC_Not1muNp0pi_Selct0Pi->SetFillColor(colorwheel_mode[3]);
 
+  // -- flux weight versions
+  TH1* hSignalQEL_Selct0Pi_FWt = sSignalQEL_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0Pi_FWt->SetFillColor(colorwheel_mode[0]);
+  TH1* hSignalMEC_Selct0Pi_FWt = sSignalMEC_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0Pi_FWt->SetFillColor(colorwheel_mode[1]);
+  TH1* hSignalRES_Selct0Pi_FWt = sSignalRES_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[2] ); hSignalRES_Selct0Pi_FWt->SetFillColor(colorwheel_mode[2]);
+  TH1* hSignalDIS_Selct0Pi_FWt = sSignalDIS_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[3] ); hSignalDIS_Selct0Pi_FWt->SetFillColor(colorwheel_mode[3]);
+  TH1* hSignalCOH_Selct0Pi_FWt = sSignalCOH_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_Selct0Pi_FWt->SetFillColor(colorwheel_mode[4]);
+  TH1* hSignalELS_Selct0Pi_FWt = sOtherNuCC_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[5] ); hSignalELS_Selct0Pi_FWt->SetFillColor(colorwheel_mode[5]);
+
+  TH1* hOtherNuNC_Selct0Pi_FWt = sOtherNuNC_Selct0Pi_FWt->ToTH1( pot, colorwheel[2] ); hOtherNuNC_Selct0Pi_FWt->SetFillColor(colorwheel[2]);
+  TH1* hCosmic_Selct0Pi_FWt    = sCosmic_Selct0Pi_FWt->ToTH1( pot, colorwheel[3] );    hCosmic_Selct0Pi_FWt->SetFillColor(colorwheel[3]);
+  TH1* hInTime_Selct0Pi_FWt    = sInTime_Selct0Pi_FWt->ToTH1( cosmicLivetime, colorwheel[4], kSolid, kLivetime ); hInTime_Selct0Pi_FWt->SetFillColor(colorwheel[4]);
+
+  TH1* hNuCC_1muNp0pi_Selct0Pi_FWt = sNuCC_1muNp0pi_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[0] ); hNuCC_1muNp0pi_Selct0Pi_FWt->SetFillColor(colorwheel_mode[0]);
+  TH1* hNuCC_Not1muNp0pi_Selct0Pi_FWt = sNuCC_Not1muNp0pi_Selct0Pi_FWt->ToTH1( pot, colorwheel_mode[3] ); hNuCC_Not1muNp0pi_Selct0Pi_FWt->SetFillColor(colorwheel_mode[3]);
+
+  // -- overlap versions
+  TH1* hSignalQEL_Selct0Pi_Signal = sSignalQEL_Selct0Pi_Signal->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0Pi_Signal->SetFillColor(colorwheel_mode[0]);
+  TH1* hSignalMEC_Selct0Pi_Signal = sSignalMEC_Selct0Pi_Signal->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0Pi_Signal->SetFillColor(colorwheel_mode[1]);
+  TH1* hSignalRES_Selct0Pi_Signal = sSignalRES_Selct0Pi_Signal->ToTH1( pot, colorwheel_mode[2] ); hSignalRES_Selct0Pi_Signal->SetFillColor(colorwheel_mode[2]);
+  TH1* hSignalDIS_Selct0Pi_Signal = sSignalDIS_Selct0Pi_Signal->ToTH1( pot, colorwheel_mode[3] ); hSignalDIS_Selct0Pi_Signal->SetFillColor(colorwheel_mode[3]);
+  TH1* hSignalCOH_Selct0Pi_Signal = sSignalCOH_Selct0Pi_Signal->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_Selct0Pi_Signal->SetFillColor(colorwheel_mode[4]);
+
+  TH1* hSignalQEL_Selct0Pi_NotSignal = sSignalQEL_Selct0Pi_NotSignal->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0Pi_NotSignal->SetFillColor(colorwheel_mode[0]); hSignalQEL_Selct0Pi_NotSignal->SetFillStyle(3345);
+  TH1* hSignalMEC_Selct0Pi_NotSignal = sSignalMEC_Selct0Pi_NotSignal->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0Pi_NotSignal->SetFillColor(colorwheel_mode[1]); hSignalMEC_Selct0Pi_NotSignal->SetFillStyle(3345);
+  TH1* hSignalRES_Selct0Pi_NotSignal = sSignalRES_Selct0Pi_NotSignal->ToTH1( pot, colorwheel_mode[2] ); hSignalRES_Selct0Pi_NotSignal->SetFillColor(colorwheel_mode[2]); hSignalRES_Selct0Pi_NotSignal->SetFillStyle(3345);
+  TH1* hSignalDIS_Selct0Pi_NotSignal = sSignalDIS_Selct0Pi_NotSignal->ToTH1( pot, colorwheel_mode[3] ); hSignalDIS_Selct0Pi_NotSignal->SetFillColor(colorwheel_mode[3]); hSignalDIS_Selct0Pi_NotSignal->SetFillStyle(3345);
+  TH1* hSignalCOH_Selct0Pi_NotSignal = sSignalCOH_Selct0Pi_NotSignal->ToTH1( pot, colorwheel_mode[4] ); hSignalCOH_Selct0Pi_NotSignal->SetFillColor(colorwheel_mode[4]); hSignalCOH_Selct0Pi_NotSignal->SetFillStyle(3345);
+
+  // -- efficiency
+  TH1 *hSignal0Pi_TrueENu_NoCut = sSignal0Pi_TrueENu_NoCut->ToTH1( pot, kBlack );
+  TH1 *hSignal0Pi_TrueENu_Selct = sSignal0Pi_TrueENu_Selct->ToTH1( pot, kRed );
+
+  TH1 *hSignal0Pi_TrueENu_TrueLept_NoCut = sSignal0Pi_TrueENu_TrueLept_NoCut->ToTH1( pot, kBlack );
+  TH1 *hSignal0Pi_TrueENu_TrueLept_Selct = sSignal0Pi_TrueENu_TrueLept_Selct->ToTH1( pot, kRed );
+
   // NoTrkY version
   TH1* hSignalQEL_Selct0PiNoTrkY = sSignalQEL_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[0] ); hSignalQEL_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[0]);
   TH1* hSignalMEC_Selct0PiNoTrkY = sSignalMEC_Selct0PiNoTrkY->ToTH1( pot, colorwheel_mode[1] ); hSignalMEC_Selct0PiNoTrkY->SetFillColor(colorwheel_mode[1]);
@@ -1469,6 +1681,7 @@ void study ()
   hAll_Selct->Add(hInTime_Selct);
 
   hAll_Selct0Pi->Add(hInTime_Selct0Pi);
+  hAll_Selct0Pi_FWt->Add(hInTime_Selct0Pi_FWt);
   hAll_Selct0PiNoTrkY->Add(hInTime_Selct0PiNoTrkY);
 
   hAll_P_Selct->Add(hInTime_P_Selct);
@@ -1607,9 +1820,9 @@ void study ()
   tLMode_Selct->Draw();
   gPad->Print("Spectrum_Modes_Selected.pdf");
 
-  // 0 Pi attempted version: (BH BH BH)
+  // 0 Pi attempted version:
   double totalCounts_Selct0Pi = hAll_Selct0Pi->Integral();
-  TLegend *tLMode_Selct0Pi = new TLegend(0.6,0.6,0.87,0.87);
+  TLegend *tLMode_Selct0Pi = new TLegend(0.5,0.5,0.87,0.87);
   tLMode_Selct0Pi->AddEntry(hSignalQEL_Selct0Pi,TString::Format("NuMu CC QEL: %.1f%%",100.*hSignalQEL_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLMode_Selct0Pi->AddEntry(hSignalMEC_Selct0Pi,TString::Format("NuMu CC MEC: %.1f%%",100.*hSignalMEC_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLMode_Selct0Pi->AddEntry(hSignalRES_Selct0Pi,TString::Format("NuMu CC RES: %.1f%%",100.*hSignalRES_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
@@ -1639,14 +1852,14 @@ void study ()
   gPad->Print("Spectrum_Modes_Selected_0Pi.pdf");
 
   // Second way of looking at it...
-  TLegend *tLSigMode_Selct0Pi = new TLegend(0.6,0.6,0.87,0.87);
+  TLegend *tLSigMode_Selct0Pi = new TLegend(0.5,0.5,0.87,0.87);
   tLSigMode_Selct0Pi->AddEntry(hNuCC_1muNp0pi_Selct0Pi,TString::Format("NuCC 1muNp0pi: %.1f%%",100.*hNuCC_1muNp0pi_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLSigMode_Selct0Pi->AddEntry(hNuCC_Not1muNp0pi_Selct0Pi,TString::Format("NuCC Not1muNp0pi: %.1f%%",100.*hNuCC_Not1muNp0pi_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLSigMode_Selct0Pi->AddEntry(hOtherNuNC_Selct0Pi,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLSigMode_Selct0Pi->AddEntry(hCosmic_Selct0Pi,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
   tLSigMode_Selct0Pi->AddEntry(hInTime_Selct0Pi,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0Pi->Integral()/totalCounts_Selct0Pi),"f");
 
-  THStack *hStackSigMode_Selct0Pi = new THStack("hStackMode_Selct0Pi", "");
+  THStack *hStackSigMode_Selct0Pi = new THStack("hStackMode_Selct0Pi_SigMode", "");
   hStackSigMode_Selct0Pi->Add(hNuCC_1muNp0pi_Selct0Pi);
   hStackSigMode_Selct0Pi->Add(hNuCC_Not1muNp0pi_Selct0Pi);
   hStackSigMode_Selct0Pi->Add(hOtherNuNC_Selct0Pi);
@@ -1659,6 +1872,120 @@ void study ()
   hAll_Selct0Pi->Draw("hist same");
   tLSigMode_Selct0Pi->Draw();
   gPad->Print("Spectrum_SignalModes_Selected_0Pi.pdf");
+
+
+  // -- version with flux weight
+  double totalCounts_Selct0Pi_FWt = hAll_Selct0Pi_FWt->Integral();
+  TLegend *tLMode_Selct0Pi_FWt = new TLegend(0.5,0.5,0.87,0.87);
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalQEL_Selct0Pi_FWt,TString::Format("NuMu CC QEL: %.1f%%",100.*hSignalQEL_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalMEC_Selct0Pi_FWt,TString::Format("NuMu CC MEC: %.1f%%",100.*hSignalMEC_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalRES_Selct0Pi_FWt,TString::Format("NuMu CC RES: %.1f%%",100.*hSignalRES_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalDIS_Selct0Pi_FWt,TString::Format("NuMu CC DIS: %.1f%%",100.*hSignalDIS_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalCOH_Selct0Pi_FWt,TString::Format("NuMu CC COH: %.1f%%",100.*hSignalCOH_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hSignalELS_Selct0Pi_FWt,TString::Format("NuMu CC NonSig: %.1f%%",100.*hSignalELS_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hOtherNuNC_Selct0Pi_FWt,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hCosmic_Selct0Pi_FWt,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLMode_Selct0Pi_FWt->AddEntry(hInTime_Selct0Pi_FWt,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+
+  THStack *hStackMode_Selct0Pi_FWt = new THStack("hStackMode_Selct0Pi_FWt", "");
+  hStackMode_Selct0Pi_FWt->Add(hSignalQEL_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hSignalMEC_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hSignalRES_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hSignalDIS_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hSignalCOH_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hSignalELS_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hOtherNuNC_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hInTime_Selct0Pi_FWt);
+  hStackMode_Selct0Pi_FWt->Add(hCosmic_Selct0Pi_FWt);
+
+  new TCanvas;
+  hAll_Selct0Pi_FWt->Draw("hist");
+  hStackMode_Selct0Pi_FWt->Draw("hist same");
+  hAll_Selct0Pi_FWt->Draw("hist same");
+  tLMode_Selct0Pi_FWt->Draw();
+  gPad->Print("Spectrum_Modes_Selected_0Pi_FluxWeight.pdf");
+
+  // Second way of looking at it...
+  TLegend *tLSigMode_Selct0Pi_FWt = new TLegend(0.5,0.5,0.87,0.87);
+  tLSigMode_Selct0Pi_FWt->AddEntry(hNuCC_1muNp0pi_Selct0Pi_FWt,TString::Format("NuCC 1muNp0pi: %.1f%%",100.*hNuCC_1muNp0pi_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLSigMode_Selct0Pi_FWt->AddEntry(hNuCC_Not1muNp0pi_Selct0Pi_FWt,TString::Format("NuCC Not1muNp0pi: %.1f%%",100.*hNuCC_Not1muNp0pi_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLSigMode_Selct0Pi_FWt->AddEntry(hOtherNuNC_Selct0Pi_FWt,TString::Format("Other Nu NC: %.1f%%",100.*hOtherNuNC_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLSigMode_Selct0Pi_FWt->AddEntry(hCosmic_Selct0Pi_FWt,TString::Format("InEvent Cosmic: %.1f%%",100.*hCosmic_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+  tLSigMode_Selct0Pi_FWt->AddEntry(hInTime_Selct0Pi_FWt,TString::Format("InTime Cosmic: %.1f%%",100.*hInTime_Selct0Pi_FWt->Integral()/totalCounts_Selct0Pi_FWt),"f");
+
+  THStack *hStackSigMode_Selct0Pi_FWt = new THStack("hStackMode_Selct0Pi_SigMode_FWt", "");
+  hStackSigMode_Selct0Pi_FWt->Add(hNuCC_1muNp0pi_Selct0Pi_FWt);
+  hStackSigMode_Selct0Pi_FWt->Add(hNuCC_Not1muNp0pi_Selct0Pi_FWt);
+  hStackSigMode_Selct0Pi_FWt->Add(hOtherNuNC_Selct0Pi_FWt);
+  hStackSigMode_Selct0Pi_FWt->Add(hInTime_Selct0Pi_FWt);
+  hStackSigMode_Selct0Pi_FWt->Add(hCosmic_Selct0Pi_FWt);
+
+  new TCanvas;
+  hAll_Selct0Pi_FWt->Draw("hist");
+  hStackSigMode_Selct0Pi_FWt->Draw("hist same");
+  hAll_Selct0Pi_FWt->Draw("hist same");
+  tLSigMode_Selct0Pi_FWt->Draw();
+  gPad->Print("Spectrum_SignalModes_Selected_0Pi_FluxWeight.pdf");
+
+
+
+  // -- overlapping version
+  //double totalCounts_Selct0Pi = hAll_Selct0Pi->Integral();
+  TLegend *tLMode_Selct0Pi_SB = new TLegend(0.5,0.5,0.87,0.87);
+  tLMode_Selct0Pi_SB->SetHeader("Sum in [0.,3.5) GeV/c. S = signal, B = not signal (hatched)");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalQEL_Selct0Pi_Signal,TString::Format("NuMu CC QEL: S %.1f -- B %.1f",hSignalQEL_Selct0Pi_Signal->Integral(),hSignalQEL_Selct0Pi_NotSignal->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalMEC_Selct0Pi_Signal,TString::Format("NuMu CC MEC: S %.1f -- B %.1f",hSignalMEC_Selct0Pi_Signal->Integral(),hSignalMEC_Selct0Pi_NotSignal->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalRES_Selct0Pi_Signal,TString::Format("NuMu CC RES: S %.1f -- B %.1f",hSignalRES_Selct0Pi_Signal->Integral(),hSignalRES_Selct0Pi_NotSignal->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalDIS_Selct0Pi_Signal,TString::Format("NuMu CC DIS: S %.1f -- B %.1f",hSignalDIS_Selct0Pi_Signal->Integral(),hSignalDIS_Selct0Pi_NotSignal->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalCOH_Selct0Pi_Signal,TString::Format("NuMu CC COH: S %.1f -- B %.1f",hSignalCOH_Selct0Pi_Signal->Integral(),hSignalCOH_Selct0Pi_NotSignal->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hSignalELS_Selct0Pi,TString::Format("NuMu CC NonSig: %.1f", hSignalELS_Selct0Pi->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hOtherNuNC_Selct0Pi,TString::Format("Other Nu NC: %.1f", hOtherNuNC_Selct0Pi->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hCosmic_Selct0Pi,TString::Format("InEvent Cosmic: %.1f", hCosmic_Selct0Pi->Integral()),"f");
+  tLMode_Selct0Pi_SB->AddEntry(hInTime_Selct0Pi,TString::Format("InTime Cosmic: %.1f", hInTime_Selct0Pi->Integral()),"f");
+
+  THStack *hStackMode_Selct0Pi_SB = new THStack("hStackMode_Selct0Pi_SB", "");
+  hStackMode_Selct0Pi_SB->Add(hSignalQEL_Selct0Pi_Signal);
+  hStackMode_Selct0Pi_SB->Add(hSignalQEL_Selct0Pi_NotSignal);
+  hStackMode_Selct0Pi_SB->Add(hSignalMEC_Selct0Pi_Signal);
+  hStackMode_Selct0Pi_SB->Add(hSignalMEC_Selct0Pi_NotSignal);
+  hStackMode_Selct0Pi_SB->Add(hSignalRES_Selct0Pi_Signal);
+  hStackMode_Selct0Pi_SB->Add(hSignalRES_Selct0Pi_NotSignal);
+  hStackMode_Selct0Pi_SB->Add(hSignalDIS_Selct0Pi_Signal);
+  hStackMode_Selct0Pi_SB->Add(hSignalDIS_Selct0Pi_NotSignal);
+  hStackMode_Selct0Pi_SB->Add(hSignalCOH_Selct0Pi_Signal);
+  hStackMode_Selct0Pi_SB->Add(hSignalCOH_Selct0Pi_NotSignal);
+  hStackMode_Selct0Pi_SB->Add(hSignalELS_Selct0Pi);
+  hStackMode_Selct0Pi_SB->Add(hOtherNuNC_Selct0Pi);
+  hStackMode_Selct0Pi_SB->Add(hInTime_Selct0Pi);
+  hStackMode_Selct0Pi_SB->Add(hCosmic_Selct0Pi);
+
+  new TCanvas;
+  hAll_Selct0Pi->Draw("hist");
+  hStackMode_Selct0Pi_SB->Draw("hist same");
+  hAll_Selct0Pi->Draw("hist same");
+  tLMode_Selct0Pi_SB->Draw();
+  gPad->Print("Spectrum_Modes_Selected_0Pi_SB.pdf");
+
+  // -- efficiency
+  new TCanvas;
+  hSignal0Pi_TrueENu_NoCut->Draw("hist");
+  hSignal0Pi_TrueENu_Selct->Draw("hist same");
+  gPad->Print("Spectrum_Selected_0Pi_Signal.pdf");
+
+  Ratio rsSignal0Pi_TrueENu_Selct( *sSignal0Pi_TrueENu_Selct, *sSignal0Pi_TrueENu_NoCut, true );
+  new TCanvas;
+  rsSignal0Pi_TrueENu_Selct.ToTH1()->Draw("");
+  gPad->Print("Spectrum_Selected_0Pi_Eff.pdf");
+
+  new TCanvas;
+  hSignal0Pi_TrueENu_TrueLept_NoCut->Draw("hist");
+  hSignal0Pi_TrueENu_TrueLept_Selct->Draw("hist same");
+  gPad->Print("Spectrum_Selected_0Pi_Signal_TrueLept.pdf");
+
+  Ratio rsSignal0Pi_TrueENu_TrueLept_Selct( *sSignal0Pi_TrueENu_TrueLept_Selct, *sSignal0Pi_TrueENu_TrueLept_NoCut, true );
+  new TCanvas;
+  rsSignal0Pi_TrueENu_TrueLept_Selct.ToTH1()->Draw("");
+  gPad->Print("Spectrum_Selected_0Pi_Eff_TrueLept.pdf");
 
 
   ///// NO TRK Y DIR VERSION
