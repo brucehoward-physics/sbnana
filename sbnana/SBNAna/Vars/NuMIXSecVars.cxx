@@ -42,6 +42,15 @@ namespace ana {
     return slice->reco.pfp.at(idxTrk).parent_is_primary;
   }
 
+  // Dummy vars
+  const Var kNuMIDummyVar1([](const caf::SRSliceProxy* slc) -> int {
+    return 1;
+  });
+
+  const Var kNuMIDummyVar0([](const caf::SRSliceProxy* slc) -> int {
+    return 0;
+  });
+
   // Emulated trigger time
   const SpillVar kNuMISpillTriggerTime ( [](const caf::SRSpillProxy *sr) -> double {
     double triggerTime = 0.;
@@ -725,6 +734,37 @@ namespace ana {
     return maxE;
   });
 
+  const Var kNuMILeadingPhotonCandidateTrueE([](const caf::SRSliceProxy* slc) -> float {
+    std::vector<double> photon_indices = kNuMIPhotonCandidateIdxs(slc);
+    if(photon_indices.size()<=1) return -5.f;
+
+    // Find 2 most energetic:
+    unsigned int idxMaxE = 0;
+    float maxE = -5.;
+    unsigned int idxScdy = 0;
+    float scdy = -5.;
+    for ( auto const& photon_idx : photon_indices ) {
+      unsigned int idxI = (unsigned int)std::lround(photon_idx);
+      if ( slc->reco.pfp[idxI].shw.plane[2].energy > maxE ) {
+        idxScdy = idxMaxE;
+        scdy = maxE;
+        idxMaxE = idxI;
+        maxE = slc->reco.pfp[idxI].shw.plane[2].energy;
+      }
+      else if ( slc->reco.pfp[idxI].shw.plane[2].energy > scdy ) {
+        idxScdy = idxI;
+        scdy = slc->reco.pfp[idxI].shw.plane[2].energy;
+      }
+    }
+
+    if ( photon_indices.size()>=2 && idxMaxE == idxScdy ) return -5.f;
+
+    float trueE = slc->reco.pfp[idxMaxE].shw.truth.p.genE;
+    if ( std::isnan(trueE) || std::isinf(trueE) ) return -5.f;
+
+    return trueE;
+  });
+
   const Var kNuMISecondaryPhotonCandidateE([](const caf::SRSliceProxy* slc) -> float {
     std::vector<double> photon_indices = kNuMIPhotonCandidateIdxs(slc);
     if(photon_indices.size()<=1) return -5.f;
@@ -751,6 +791,37 @@ namespace ana {
     if ( photon_indices.size()>=2 && idxMaxE == idxScdy ) return -5.f;
 
     return scdy;
+  });
+
+  const Var kNuMISecondaryPhotonCandidateTrueE([](const caf::SRSliceProxy* slc) -> float {
+    std::vector<double> photon_indices = kNuMIPhotonCandidateIdxs(slc);
+    if(photon_indices.size()<=1) return -5.f;
+
+    // Find 2 most energetic:
+    unsigned int idxMaxE = 0;
+    float maxE = -5.;
+    unsigned int idxScdy = 0;
+    float scdy = -5.;
+    for ( auto const& photon_idx : photon_indices ) {
+      unsigned int idxI = (unsigned int)std::lround(photon_idx);
+      if ( slc->reco.pfp[idxI].shw.plane[2].energy > maxE ) {
+        idxScdy = idxMaxE;
+        scdy = maxE;
+        idxMaxE = idxI;
+        maxE = slc->reco.pfp[idxI].shw.plane[2].energy;
+      }
+      else if ( slc->reco.pfp[idxI].shw.plane[2].energy > scdy ) {
+        idxScdy = idxI;
+        scdy = slc->reco.pfp[idxI].shw.plane[2].energy;
+      }
+    }
+
+    if ( photon_indices.size()>=2 && idxMaxE == idxScdy ) return -5.f;
+
+    float trueE = slc->reco.pfp[idxScdy].shw.truth.p.genE;
+    if ( std::isnan(trueE) || std::isinf(trueE) ) return -5.f;
+
+    return trueE;
   });
 
   const Var kNuMIPhotonCandidatesOpeningAngle([](const caf::SRSliceProxy* slc) -> float {

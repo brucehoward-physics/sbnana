@@ -19,6 +19,10 @@ namespace ana
   bool IsShowerlike( const caf::SRSliceProxy* slice, const unsigned int idxShw );
   bool IsPrimaryPFP( const caf::SRSliceProxy* slice, const unsigned int idxTrk );
 
+  /// \ref Var that is a dummy var that returns 1 for "IsFHC" or 0 for "!IsFHC" for example
+  extern const Var kNuMIDummyVar1;
+  extern const Var kNuMIDummyVar0;
+
   /// \ref SpillVar for trigger time (check if the implementation is only comaptible for emulated trigger and fix if so...)
   extern const SpillVar kNuMISpillTriggerTime;
 
@@ -88,6 +92,8 @@ namespace ana
 
   // Sideband vars: pi0
   extern const Var kNuMILeadingPhotonCandidateE;
+  extern const Var kNuMILeadingPhotonCandidateTrueE;
   extern const Var kNuMISecondaryPhotonCandidateE;
+  extern const Var kNuMISecondaryPhotonCandidateTrueE;
   extern const Var kNuMIPhotonCandidatesOpeningAngle;
 }
