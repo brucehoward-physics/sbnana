@@ -40,7 +40,15 @@ namespace ana {
     return slice->reco.npfp > idxTrk;
   }
 
+  bool IsValidTrkIdx( const caf::SRSlice* slice, const unsigned int idxTrk ) {
+    return slice->reco.npfp > idxTrk;
+  }
+
   bool IsTracklikeTrack( const caf::SRSliceProxy* slice, const unsigned int idxTrk ) {
+    return (!std::isnan(slice->reco.pfp.at(idxTrk).trackScore) && slice->reco.pfp.at(idxTrk).trackScore > 0.45);
+  }
+
+  bool IsTracklikeTrack( const caf::SRSlice* slice, const unsigned int idxTrk ) {
     return (!std::isnan(slice->reco.pfp.at(idxTrk).trackScore) && slice->reco.pfp.at(idxTrk).trackScore > 0.45);
   }
 
@@ -48,7 +56,15 @@ namespace ana {
     return (!std::isnan(slice->reco.pfp.at(idxShw).trackScore) && slice->reco.pfp.at(idxShw).trackScore > 0. && slice->reco.pfp.at(idxShw).trackScore <= 0.45 );
   }
 
+  bool IsShowerlike( const caf::SRSlice* slice, const unsigned int idxShw ) {
+    return (!std::isnan(slice->reco.pfp.at(idxShw).trackScore) && slice->reco.pfp.at(idxShw).trackScore > 0. && slice->reco.pfp.at(idxShw).trackScore <= 0.45 );
+  }
+
   bool IsPrimaryPFP( const caf::SRSliceProxy* slice, const unsigned int idxTrk ) {
+    return slice->reco.pfp.at(idxTrk).parent_is_primary;
+  }
+
+  bool IsPrimaryPFP( const caf::SRSlice* slice, const unsigned int idxTrk ) {
     return slice->reco.pfp.at(idxTrk).parent_is_primary;
   }
 

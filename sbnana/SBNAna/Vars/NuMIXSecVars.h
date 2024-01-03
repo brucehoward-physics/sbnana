@@ -5,6 +5,8 @@
 #include "sbnana/SBNAna/Vars/NuMIXSecTruthVars.h"
 #include "sbnanaobj/StandardRecord/Proxy/SRProxy.h"
 
+#include "sbnanaobj/StandardRecord/SRSlice.h"
+
 namespace ana
 {
   /// bool to determine if object is in fiducial volume
@@ -19,6 +21,11 @@ namespace ana
   bool IsTracklikeTrack( const caf::SRSliceProxy* slice, const unsigned int idxTrk );
   bool IsShowerlike( const caf::SRSliceProxy* slice, const unsigned int idxShw );
   bool IsPrimaryPFP( const caf::SRSliceProxy* slice, const unsigned int idxTrk );
+
+  bool IsValidTrkIdx( const caf::SRSlice* slice, const unsigned int idxTrk );
+  bool IsTracklikeTrack( const caf::SRSlice* slice, const unsigned int idxTrk );
+  bool IsShowerlike( const caf::SRSlice* slice, const unsigned int idxShw );
+  bool IsPrimaryPFP( const caf::SRSlice* slice, const unsigned int idxTrk );
 
   /// \ref Var that is a dummy var that returns 1 for "IsFHC" or 0 for "!IsFHC" for example
   extern const Var kNuMIDummyVar1;
