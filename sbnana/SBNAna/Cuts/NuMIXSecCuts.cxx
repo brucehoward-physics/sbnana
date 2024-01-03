@@ -8,7 +8,8 @@ namespace ana {
   // Cut on having valid trigger time in approx. beam window
   const SpillCut kNuMIValidTrigger ( [](const caf::SRSpillProxy *sr) {
     double spillTriggerTime = kNuMISpillTriggerTime(sr);
-    return spillTriggerTime > -0.1 && spillTriggerTime < 9.7;
+    //return spillTriggerTime > -0.1 && spillTriggerTime < 9.7;
+    return spillTriggerTime > -5.;
   });
 
   // reco vertex fiducial volume cut
