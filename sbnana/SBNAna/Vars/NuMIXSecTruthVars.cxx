@@ -4,6 +4,54 @@ namespace ana{
 
   // Neutrino/interaction
 
+  const TruthVar kTruth_IsSignal([](const caf::SRTrueInteractionProxy *nu) -> int {
+    if ( abs(nu->pdg) != 14 ||
+         !nu->iscc ||
+         std::isnan(nu->position.x) || std::isnan(nu->position.y) || std::isnan(nu->position.z) ||
+         !isInFV(nu->position.x, nu->position.y, nu->position.z) )
+      return 0; // not signal
+
+    unsigned int nMu(0), nP(0), nPi(0);
+    unsigned int genieNPhotons(0), genieNMesons(0), genieNBaryonsAndPi0(0);
+    double maxMomentumP = 0.;
+    bool passProtonPCut = false;
+    for ( auto const& prim : nu->prim ) {
+      if ( prim.start_process != 0 ) continue;
+
+      double momentum = sqrt( (prim.genp.x*prim.genp.x) + (prim.genp.y*prim.genp.y) + (prim.genp.z*prim.genp.z) );
+
+      bool PassMuonPCut = (momentum > 0.226);
+      if ( abs(prim.pdg) == 13 ) {
+        if (PassMuonPCut) nMu+=1;
+      }
+
+      if ( abs(prim.pdg) == 2212 ) {
+        nP+=1;
+        if ( momentum > maxMomentumP ) {
+          maxMomentumP = momentum;
+          passProtonPCut = (momentum > 0.4 && momentum < 1.);
+        }
+      }
+
+      if ( abs(prim.pdg) == 111 || abs(prim.pdg) == 211 ) nPi+=1;
+      // CHECK A SIMILAR DEFINITION AS MINERVA FOR EXTRA REJECTION OF UNWANTED THINGS IN SIGNAL DEFN.
+      if ( abs(prim.pdg) == 22 && prim.startE > 0.01 ) genieNPhotons+=1;
+      else if ( abs(prim.pdg) == 211 || abs(prim.pdg) == 321 || abs(prim.pdg) == 323 ||
+                prim.pdg == 111 || prim.pdg == 130 || prim.pdg == 310 || prim.pdg == 311 ||
+                prim.pdg == 313 || abs(prim.pdg) == 221 || abs(prim.pdg) == 331 ) genieNMesons+=1;
+      else if ( prim.pdg == 3112 || prim.pdg == 3122 || prim.pdg == 3212 || prim.pdg == 3222 ||
+                prim.pdg == 4112 || prim.pdg == 4122 || prim.pdg == 4212 || prim.pdg == 4222 ||
+                prim.pdg == 411 || prim.pdg == 421 || prim.pdg == 111 ) genieNBaryonsAndPi0+=1;
+    }
+
+    if ( nMu!=1 || nP==0 || nPi > 0 || genieNPhotons > 0 || genieNMesons > 0 || genieNBaryonsAndPi0 > 0 ) {
+      return 0;
+    }
+
+    if (passProtonPCut) return 1; 
+    return 0;
+  });
+
   const TruthVar kTruth_NProton_Primary([](const caf::SRTrueInteractionProxy *nu) -> int {
     int NPtl = 0;
     for ( auto const& prim : nu->prim ) {

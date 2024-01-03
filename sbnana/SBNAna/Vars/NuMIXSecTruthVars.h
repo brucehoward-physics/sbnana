@@ -3,7 +3,11 @@
 #include "sbnana/CAFAna/Core/Var.h"
 #include "sbnana/CAFAna/Core/Cut.h"
 #include "sbnana/CAFAna/Core/MultiVar.h"
+
+#include "sbnana/SBNAna/Vars/NuMIXSecVars.h"
+
 #include "sbnanaobj/StandardRecord/Proxy/SRProxy.h"
+
 #include "TVector3.h"
 #include <iostream>
 
@@ -19,6 +23,7 @@
 namespace ana{
 
   // Neutrino/interaction
+  extern const TruthVar kTruth_IsSignal;
 
   const TruthVar kTruth_NeutrinoE = SIMPLETRUTHVAR(E);
   const TruthVar kTruth_NeutrinoPDG = SIMPLETRUTHVAR(pdg);
