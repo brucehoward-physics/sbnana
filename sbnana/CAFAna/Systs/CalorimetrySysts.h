@@ -54,7 +54,7 @@ namespace ana
 
   };
 
-  extern const CalorimetrySyst kCalodEdXShiftSyst;
-  extern const CalorimetrySyst kCaloGainShiftSyst;
+  //extern const CalorimetrySyst kCalodEdXShiftSyst;
+  //extern const CalorimetrySyst kCaloGainShiftSyst;
 
 }

@@ -213,8 +213,8 @@ namespace ana {
 
   }
 
-  const CalorimetrySyst kCalodEdXShiftSyst(CaloSystMode::kdEdXShift, "CalodEdXShiftSyst", "Calo. dEdX shift");
-  const CalorimetrySyst kCaloGainShiftSyst(CaloSystMode::kGainShift, "CaloGainShiftSyst", "Calo. Gain shift");
+  //const CalorimetrySyst kCalodEdXShiftSyst(CaloSystMode::kdEdXShift, "CalodEdXShiftSyst", "Calo. dEdX shift");
+  //const CalorimetrySyst kCaloGainShiftSyst(CaloSystMode::kGainShift, "CaloGainShiftSyst", "Calo. Gain shift");
 
 
 } // end namespace ana
