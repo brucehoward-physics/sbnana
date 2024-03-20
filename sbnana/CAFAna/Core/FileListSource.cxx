@@ -95,7 +95,7 @@ namespace ana
 
     // If the file is on pnfs rewrite it to an xrootd address
     std::string loc = *fIt;
-    loc = pnfs2xrootd(loc); // no-op for non /pnfs locations
+    //loc = pnfs2xrootd(loc); // no-op for non /pnfs locations
 
     fFile = TFile::Open(loc.c_str()); // This pattern allows xrootd
     // --> Adding this from Jaesung to skip bad files for the full Phase2 MC sample...

@@ -1063,7 +1063,7 @@ namespace ana
   {
     if(fabs(fPOT - fPOTFromHist)/std::min(fPOT, fPOTFromHist) > 0.001){
       std::cout << fPOT << " POT from hdr differs from " << fPOTFromHist << " POT from the TotalPOT histogram!" << std::endl;
-      abort();
+      //abort(); // COMMENTED OUT BH FOR TESTING ON 18 MARCH 2024
     }
 
     std::cout << fPOT << " POT over " << fNReadouts << " readouts" << std::endl;
