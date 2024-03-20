@@ -8,6 +8,7 @@ cet_make_library(LIBRARY_NAME CAFAnaSysts
          LIBRARIES CAFAnaCore
                    CAFAnaCuts
                    sbnanaobj::StandardRecordProxy
+                   sbnanaobj::StandardRecord
                    cetlib::cetlib
                    cetlib_except::cetlib_except
         )
