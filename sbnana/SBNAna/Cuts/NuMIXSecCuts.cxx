@@ -107,7 +107,7 @@ namespace ana {
   // For now the sidebands revolve around chg pi and pi0
   const Cut kNuMISelection_1muNp_Base = kNuMIVertexInFV && kNuMINotClearCosmic &&
                                         kNuMIHasMuonCandidate && kNuMIHasProtonCandidate &&
-                                        kNuMIProtonCandidateRecoPTreshold &&
+                                        //kNuMIProtonCandidateRecoPTreshold &&
                                         kNuMIAllPrimaryHadronsContained;
 
   // Full selection: 1muNp0pi without caring about containment
@@ -120,6 +120,13 @@ namespace ana {
                                       kNuMIHasMuonCandidate && kNuMIHasProtonCandidate && kNuMIProtonCandidateRecoPTreshold && /*Mu, P candidates*/
                                       kNuMIAllPrimaryHadronsContained && kNuMINoSecondPrimaryMuonlikeTracks &&                 /*Esp. chg pi rejection*/
                                       kNuMICutPhotons;                                                                         /*Esp. pi0 rejection*/
+
+  // Full selection but with the proton reco threshold cut inverted:
+  const Cut kNuMISelection_1muNp0pi_pThreshSB = kNuMIVertexInFV && kNuMINotClearCosmic &&                                                /*Preselection*/
+                                                kNuMIHasMuonCandidate && kNuMIHasProtonCandidate && !kNuMIProtonCandidateRecoPTreshold && /*Mu, P candidates*/
+                                                kNuMIAllPrimaryHadronsContained && kNuMINoSecondPrimaryMuonlikeTracks &&                 /*Esp. chg pi rejection*/
+                                                kNuMICutPhotons;                                                                         /*Esp. pi0 rejection*/
+
 
   // Muon containment
   const Cut kNuMIMuonCandidateContained([](const caf::SRSliceProxy* slc) {
@@ -206,6 +213,7 @@ namespace ana {
   const Var kNuMICutType([](const caf::SRSliceProxy* slc) -> double {
 
     if( kNuMISelection_1muNp0pi(slc) ) return 1;
+    if( kNuMISelection_1muNp0pi_pThreshSB(slc) ) return 10;
     else if( kNuMIChargedPionSideBand(slc) ) return 2;
     else if( kNuMINeutralPion2phSideBand(slc) ) return 3; // this should be a subset of 4! so if you want 4, use "3 || 4"
     else if( kNuMINeutralPionSideBand(slc) ) return 4;
@@ -247,7 +255,7 @@ namespace ana {
     return ( slc->truth.index < 0 );
   });
   /// \ref Check 1muNp0pi using vector of primaries
-  bool Is1muNp0pi(const caf::Proxy<caf::SRTrueInteraction>& true_int, bool ApplyPhaseSpcaeCut, bool printouts){
+  bool Is1muNp0pi(const caf::Proxy<caf::SRTrueInteraction>& true_int, bool ApplyPhaseSpcaeCut, bool printouts, bool ApplyProtonThrehsoldless ){
     if ( printouts ) std::cout << "CHECKING Is1muNp0pi with printouts = true..." << std::endl;
     if ( true_int.index < 0 ) return false;
 
@@ -302,7 +310,7 @@ namespace ana {
       }
       return false;
     }
-    else if ( ApplyPhaseSpcaeCut ) return passProtonPCut; 
+    else if ( ApplyPhaseSpcaeCut && !ApplyProtonThrehsoldless ) return passProtonPCut; 
 
     return true;
 
@@ -317,6 +325,10 @@ namespace ana {
   });
   const Cut kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCutWithPrintouts([](const caf::SRSliceProxy* slc) {
     return Is1muNp0pi(slc->truth, true, true);
+  });
+  // kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut_pThreshRemoved
+  const Cut kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut_pThreshRemoved([](const caf::SRSliceProxy* slc) {
+    return Is1muNp0pi(slc->truth, false, false, true);
   });
   /// \ref TruthCut version of signal def
   const TruthCut kTruthCut_IsSignal([](const caf::SRTrueInteractionProxy* nu) {
@@ -338,6 +350,7 @@ namespace ana {
   /// can be expanded further
   const Var kNuMISliceSignalType([](const caf::SRSliceProxy* slc) -> int {
     if ( kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut(slc) ) return 1; // Signal (with phase space cut)
+    else if ( kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut_pThreshRemoved(slc) ) return 10; // Signal (with phase space cut)
     else if ( kNuMI_1muNp0piStudy_Signal_FailPhaseSpaceCut(slc) ) return 2; // Signal but out of phase space cut (OOPS)
     else if ( kNuMI_1muNp0piStudy_OtherNuCC(slc) ) return 3; // CC but not (signal without phase space cut)
     else if ( kNuMI_IsSliceNuNC(slc) ) return 4; // NC

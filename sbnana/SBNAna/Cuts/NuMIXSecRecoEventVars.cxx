@@ -93,6 +93,24 @@ namespace ana{
     if ( slc->truth.index < 0 ) return -5; //TODO Define better dummy value
     return kTruth_IsFHC(&slc->truth);
   });
+  // Decay coords
+  const Var kNuMITrueParentPDG([](const caf::SRSliceProxy* slc) -> int {
+    if ( slc->truth.index < 0 ) return 0;
+    return kTruth_NuParentPDG(&slc->truth);
+  });
+  const Var kNuMITrueParentDkX([](const caf::SRSliceProxy* slc) -> double {
+    if ( slc->truth.index < 0 ) return -9999.; //TODO Define better dummy value
+    return kTruth_NuParentDkX(&slc->truth);
+  });
+  const Var kNuMITrueParentDkY([](const caf::SRSliceProxy* slc) -> double {
+    if ( slc->truth.index < 0 ) return -9999.; //TODO Define better dummy value
+    return kTruth_NuParentDkY(&slc->truth);
+  });
+  const Var kNuMITrueParentDkZ([](const caf::SRSliceProxy* slc) -> double {
+    if ( slc->truth.index < 0 ) return -9999.; //TODO Define better dummy value
+    return kTruth_NuParentDkZ(&slc->truth);
+  });
+
 
   // True muon kinetic energy
   const Var kNuMITrueMuonKE([](const caf::SRSliceProxy* slc) -> double {

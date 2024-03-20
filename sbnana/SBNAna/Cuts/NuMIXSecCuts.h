@@ -37,6 +37,7 @@ namespace ana
 
   /// Combined selection \ref Cut for 1muNp0pi with contained+exiting muons
   extern const Cut kNuMISelection_1muNp0pi;
+  extern const Cut kNuMISelection_1muNp0pi_pThreshSB; /// version with the proton threshold cut inverted
 
   /// \ref Cut aimed at muon candidate containment, if so desired
   extern const Cut kNuMIMuonCandidateContained;
@@ -65,13 +66,14 @@ namespace ana
   extern const Cut kNuMI_IsSlcNotNu;
 
   /// \ref Check 1muNp0pi using vector of primaries; optionally apply phase space cut
-  bool Is1muNp0pi(const caf::Proxy<caf::SRTrueInteraction>& true_int, bool ApplyPhaseSpcaeCut, bool printouts=false);
+  bool Is1muNp0pi(const caf::Proxy<caf::SRTrueInteraction>& true_int, bool ApplyPhaseSpcaeCut, bool printouts=false, bool ApplyProtonThrehsoldless=false);
   inline bool Is1muNp0piWithPhaseSpaceCut(const caf::Proxy<caf::SRTrueInteraction>& true_int){ return Is1muNp0pi(true_int, true); }
   /// \ref Signal without phase space cut
   extern const Cut kNuMI_1muNp0piStudy_Signal_WithoutPhaseSpaceCut;
   /// \ref Signal with phase space cut = "Signal"
   extern const Cut kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut;
   extern const Cut kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCutWithPrintouts;
+  extern const Cut kNuMI_1muNp0piStudy_Signal_WithPhaseSpaceCut_pThreshRemoved;
   /// \ref TruthCut version of signal def
   extern const TruthCut kTruthCut_IsSignal;
   /// \ref Signal but fails phase space cut = "out of phase space" (OOPS)
