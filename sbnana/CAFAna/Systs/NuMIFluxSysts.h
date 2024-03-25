@@ -50,4 +50,24 @@ namespace ana {
   ///        components
   std::vector<const ISyst*> GetAllNuMIFluxSysts(unsigned int Npcs);
 
+  /// Class *like* NuMIFluxSyst but for the BeamShift systematic
+  class NuMIBeamShiftSyst : public ISyst {
+  public:
+    virtual ~NuMIBeamShiftSyst();
+
+    void Shift(double sigma, caf::SRSliceProxy* slc, double& weight) const override;
+    void Shift(double sigma, caf::SRTrueInteractionProxy* nu, double& weight) const override;
+
+  protected:
+    friend const NuMIBeamShiftSyst* GetNuMIBeamShiftSyst(const std::string&);
+
+    NuMIBeamShiftSyst(const std::string& fluxFile = "");
+
+    std::string fHistName, fName, fFluxFilePath;
+
+    mutable TH1* fScale[2][2][2][2]; // [+sigma/-sigma][fhc/rhc][nue/numu][nu/nubar]
+  };
+
+  const NuMIBeamShiftSyst* GetNuMIBeamShiftSyst(const std::string& fluxFile = "");
+
 } // namespace ana

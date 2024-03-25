@@ -101,6 +101,8 @@ namespace ana {
   });
 
   /// --- VERSIONS WITH THE CONCRETE WEIGHTS
+  /// and as of 20 March 2024, updating to include an additional 
+  /// weight for Kaon parents aimed at correcting for the G4 xsec error.
   //// ----------------------------------------------
   NuMIPpfxFluxWeightG3Chase::NuMIPpfxFluxWeightG3Chase()
   {
@@ -112,6 +114,7 @@ namespace ana {
       std::abort();
     }
 
+    // normal PPFX weights
     fFluxFilePath = std::string(sbndata) +
                    "beamData/NuMIdata/2023-07-31_out_450.37_7991.98_79512.66_QEL11.root";
 
@@ -149,6 +152,7 @@ namespace ana {
       }
     }
 
+    // Geometry updates, so-called "G3 chase"
     fFluxFilePathG3Chase = std::string(sbndata) +
                            "beamData/NuMIdata/g3Chase_weights_rewritten.root";
 
@@ -189,11 +193,39 @@ namespace ana {
         }
       }
     }
+
+    // Kaon correction for newer G4
+    fFluxFilePathG4Kaon = std::string(sbndata) +
+                          "beamData/NuMIdata/g4_10_4_weights_rewritten.root";
+
+    TFile f3(fFluxFilePathG4Kaon.c_str());
+    if (f3.IsZombie()) {
+      std::cout << "NuMIPpfxFluxG3ChaseWeight: Failed to open " << fFluxFilePathG4Kaon << std::endl;
+      std::abort();
+    }
+
+    for (int signIdx : {0, 1}) {
+      std::string hNameKaon = "hweights_g4_10_4_kpm_fhc_numu";
+      if (signIdx == 1) hNameKaon += "bar";
+
+      TH1* h_g4kaon = (TH1*)f3.Get(hNameKaon.c_str());
+      if (!h_g4kaon) {
+        std::cout << "NuMIPpfxFluxG3ChaseWeight: failed to find " << hNameKaon << " in " << f3.GetName()
+                  << std::endl;
+        std::abort();
+      }
+      h_g4kaon = (TH1*)h_g4kaon->Clone(UniqueName().c_str());
+      h_g4kaon->SetDirectory(0);
+
+      fWeightG4Kaon[signIdx] = h_g4kaon;
+    }
+
   }
 
   NuMIPpfxFluxWeightG3Chase::~NuMIPpfxFluxWeightG3Chase()
   {
     for (int i = 0; i < 2; ++i) {
+      delete fWeightG4Kaon[i];
       for (int j = 0; j < 2; ++j) {
         for (int k = 0; k < 4; ++k) {
           if ( k < 2 ) delete fWeight[i][j][k];
@@ -203,29 +235,12 @@ namespace ana {
     }
   }
 
-  unsigned int NuMIPpfxFluxWeightG3Chase::ParentPDGToIdx(int pdg) const
+  double NuMIPpfxFluxWeightG3Chase::GetWeightFromSRTrueInt(const caf::SRTrueInteractionProxy* nu, const bool applyKaonRW) const
   {
-    if      ( abs(pdg) == 211 ) return 0;
-    else if ( abs(pdg) == 321 ) return 1;
-    else if ( abs(pdg) == 13  ) return 2;
-    else if ( abs(pdg) == 130 ) return 3;
-    return 4;
-  }
-
-
-  //// ----------------------------------------------
-
-  const Var kGetNuMIFluxWeightG3Chase([](const caf::SRSliceProxy* slc) -> double {
-    return kGetTruthNuMIFluxWeightG3Chase(&slc->truth);
-  });
-
-  //// ----------------------------------------------
-
-  const TruthVar kGetTruthNuMIFluxWeightG3Chase([](const caf::SRTrueInteractionProxy* nu) -> double {
     if (nu->index < 0 || abs(nu->initpdg) == 16) return 1.0;
 
     /// Choose 1 1 1 for the G3Chase weight check since the 0 0 0 is meaningless here...
-    if (!FluxWeightNuMIG3Chase.fWeight[0][0][0] || !FluxWeightNuMIG3Chase.fWeightG3Chase[1][1][1]) {
+    if (!fWeight[0][0][0] || !fWeightG3Chase[1][1][1]) {
       std::cout << "Trying to access un-available weight array..." << std::endl;
       std::abort();
     }
@@ -233,9 +248,9 @@ namespace ana {
     unsigned int hcIdx = 0; // assume always FHC for now...
     unsigned int flavIdx = (abs(nu->initpdg) == 12) ? 0 : 1;
     unsigned int signIdx = (nu->initpdg > 0) ? 0 : 1;
-    unsigned int pdgIdx = FluxWeightNuMIG3Chase.ParentPDGToIdx(nu->parent_pdg);
+    unsigned int pdgIdx = ParentPDGToIdx(nu->parent_pdg);
 
-    TH1* h = FluxWeightNuMIG3Chase.fWeight[hcIdx][flavIdx][signIdx];
+    TH1* h = fWeight[hcIdx][flavIdx][signIdx];
     assert(h);
 
     double weight = 1.0;
@@ -249,14 +264,57 @@ namespace ana {
     // return the weight as-is if looking for additional weight in the nue pion channel
     if ( pdgIdx == 0 && flavIdx == 0 ) return weight;
 
-    TH1* h2 = FluxWeightNuMIG3Chase.fWeightG3Chase[flavIdx][signIdx][pdgIdx];
+    TH1* h2 = fWeightG3Chase[flavIdx][signIdx][pdgIdx];
     assert(h2);
 
     const int bin2 = h2->FindBin(nu->E);
-    if ( bin2 != 0 && bin2 != h2->GetNbinsX() + 1 && !std::isinf(h2->GetBinContent(bin2)) && !std::isnan(h2->GetBinContent(bin2)) )
+    if ( bin2 != 0 && bin2 != h2->GetNbinsX() + 1 && !std::isinf(h2->GetBinContent(bin2)) && !std::isnan(h2->GetBinContent(bin2)) ) {
       weight*=h2->GetBinContent(bin2);
+    }
+
+    if ( pdgIdx==1 && applyKaonRW ) {
+      TH1* h3 = fWeightG4Kaon[signIdx];
+      assert(h3);
+      const int bin3 = h3->FindBin(nu->E);
+      if ( bin3 != 0 && bin3 != h3->GetNbinsX() + 1 && !std::isinf(h3->GetBinContent(bin3)) && !std::isnan(h3->GetBinContent(bin3)) ) {
+        weight*=h3->GetBinContent(bin3);
+      }
+    }
 
     return weight;
+  }
+
+  unsigned int NuMIPpfxFluxWeightG3Chase::ParentPDGToIdx(int pdg) const
+  {
+    if      ( abs(pdg) == 211 ) return 0;
+    else if ( abs(pdg) == 321 ) return 1;
+    else if ( abs(pdg) == 13  ) return 2;
+    else if ( abs(pdg) == 130 ) return 3;
+    return 4;
+  }
+
+  //// ----------------------------------------------
+
+  const Var kGetNuMIFluxWeightG3Chase([](const caf::SRSliceProxy* slc) -> double {
+    return kGetTruthNuMIFluxWeightG3Chase(&slc->truth);
+  });
+
+  //// ----------------------------------------------
+
+  const TruthVar kGetTruthNuMIFluxWeightG3Chase([](const caf::SRTrueInteractionProxy* nu) -> double {
+    return FluxWeightNuMIG3Chase.GetWeightFromSRTrueInt(nu,false);
+  });
+
+  //// ----------------------------------------------
+
+  const Var kGetNuMIFluxWeightUpdated([](const caf::SRSliceProxy* slc) -> double {
+    return kGetTruthNuMIFluxWeightUpdated(&slc->truth);
+  });
+
+  //// ----------------------------------------------
+
+  const TruthVar kGetTruthNuMIFluxWeightUpdated([](const caf::SRTrueInteractionProxy* nu) -> double {
+    return FluxWeightNuMIG3Chase.GetWeightFromSRTrueInt(nu,true);
   });
 
 }
