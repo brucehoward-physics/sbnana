@@ -33,11 +33,13 @@ namespace ana
     if ( saveRunSubEvt ) {
       assert( fBranchEntries.find("Run/i") == fBranchEntries.end() &&
               fBranchEntries.find("Subrun/i") == fBranchEntries.end() &&
-              fBranchEntries.find("Evt/i") == fBranchEntries.end() );
+              fBranchEntries.find("Evt/i") == fBranchEntries.end() &&
+              fFileNameEntries.find("FileName") == fFileNameEntries.end() );
 
       fOrderedBranchNames.push_back( "Run/i" ); fBranchEntries["Run/i"] = {};
       fOrderedBranchNames.push_back( "Subrun/i" ); fBranchEntries["Subrun/i"] = {};
       fOrderedBranchNames.push_back( "Evt/i" ); fBranchEntries["Evt/i"] = {};
+      fFileNameEntries["FileName"] = {};
     }
     if ( saveSliceNum ) {
       assert( fBranchEntries.find("Slice/i") == fBranchEntries.end() );
@@ -65,11 +67,13 @@ namespace ana
     if ( saveRunSubEvt ) {
       assert( fBranchEntries.find("Run/i") == fBranchEntries.end() &&
               fBranchEntries.find("Subrun/i") == fBranchEntries.end() &&
-              fBranchEntries.find("Evt/i") == fBranchEntries.end() );
+              fBranchEntries.find("Evt/i") == fBranchEntries.end() &&
+              fFileNameEntries.find("FileName") == fFileNameEntries.end() );
 
       fOrderedBranchNames.push_back( "Run/i" ); fBranchEntries["Run/i"] = {};
       fOrderedBranchNames.push_back( "Subrun/i" ); fBranchEntries["Subrun/i"] = {};
       fOrderedBranchNames.push_back( "Evt/i" ); fBranchEntries["Evt/i"] = {};
+      fFileNameEntries["FileName"] = {};
     }
     if ( saveSliceNum ) {
       assert( fBranchEntries.find("Slice/i") == fBranchEntries.end() );
@@ -96,11 +100,13 @@ namespace ana
     if ( saveRunSubEvt ) {
       assert( fBranchEntries.find("Run/i") == fBranchEntries.end() &&
               fBranchEntries.find("Subrun/i") == fBranchEntries.end() &&
-              fBranchEntries.find("Evt/i") == fBranchEntries.end() );
+              fBranchEntries.find("Evt/i") == fBranchEntries.end() &&
+              fFileNameEntries.find("FileName") == fFileNameEntries.end() );
 
       fOrderedBranchNames.push_back( "Run/i" ); fBranchEntries["Run/i"] = {};
       fOrderedBranchNames.push_back( "Subrun/i" ); fBranchEntries["Subrun/i"] = {};
       fOrderedBranchNames.push_back( "Evt/i" ); fBranchEntries["Evt/i"] = {};
+      fFileNameEntries["FileName"] = {};
     }
 
     loader.AddTree( *this, labels, vars, spillcut );
@@ -123,11 +129,13 @@ namespace ana
     if ( saveRunSubEvt ) {
       assert( fBranchEntries.find("Run/i") == fBranchEntries.end() &&
               fBranchEntries.find("Subrun/i") == fBranchEntries.end() &&
-              fBranchEntries.find("Evt/i") == fBranchEntries.end() );
+              fBranchEntries.find("Evt/i") == fBranchEntries.end() &&
+              fFileNameEntries.find("FileName") == fFileNameEntries.end() );
 
       fOrderedBranchNames.push_back( "Run/i" ); fBranchEntries["Run/i"] = {};
       fOrderedBranchNames.push_back( "Subrun/i" ); fBranchEntries["Subrun/i"] = {};
       fOrderedBranchNames.push_back( "Evt/i" ); fBranchEntries["Evt/i"] = {};
+      fFileNameEntries["FileName"] = {};
     }
 
     loader.AddTree( *this, labels, vars, spillcut );
@@ -157,11 +165,13 @@ namespace ana
     if ( saveRunSubEvt ) {
       assert( fBranchEntries.find("Run/i") == fBranchEntries.end() &&
               fBranchEntries.find("Subrun/i") == fBranchEntries.end() &&
-              fBranchEntries.find("Evt/i") == fBranchEntries.end() );
+              fBranchEntries.find("Evt/i") == fBranchEntries.end() &&
+              fFileNameEntries.find("FileName") == fFileNameEntries.end() );
 
       fOrderedBranchNames.push_back( "Run/i" ); fBranchEntries["Run/i"] = {};
       fOrderedBranchNames.push_back( "Subrun/i" ); fBranchEntries["Subrun/i"] = {};
       fOrderedBranchNames.push_back( "Evt/i" ); fBranchEntries["Evt/i"] = {};
+      fFileNameEntries["FileName"] = {};
     }
 
     loader.AddTree( *this, labels, vars, spillcut, truthcut, shift );
@@ -169,17 +179,28 @@ namespace ana
 
   //----------------------------------------------------------------------
   // Add an entry to a branch
-  void Tree::UpdateEntries( const std::map<std::string, std::vector<double>> valsMap )
+  void Tree::UpdateEntries( const std::map<std::string, std::vector<double>> valsMap,
+                            const std::map<std::string, std::vector<std::string>> namesMap )
   {
+    //std::cout << "I am updating entries..." << std::endl;
+
     unsigned int idxBranch = 0;
     unsigned int previousSize=0;
     for ( auto const& [name, vals] : valsMap ) {
       if ( idxBranch>0 ) assert(previousSize == vals.size());
       assert ( fBranchEntries.find(name) != fBranchEntries.end() );
 
+      //std::cout << "Branch: " << name << ", Size: " << vals.size() << ", Entry 0: " << (vals.size() > 0 ? std::to_string(vals[0]) : "n/a") << std::endl;
+
       previousSize = vals.size();
       fBranchEntries.at(name).insert(fBranchEntries.at(name).end(),vals.begin(),vals.end());
       idxBranch+=1;
+    }
+    for ( auto const& [name, vals] : namesMap ) {
+      if ( fSaveRunSubEvt ) assert(previousSize == vals.size());
+      fFileNameEntries.at(name).insert(fFileNameEntries.at(name).end(),vals.begin(),vals.end());
+
+      //std::cout << "Branch: " << name << ", Size: " << vals.size() << ", Entry 0: " << (vals.size() > 0 ? vals[0] : "n/a") << std::endl;
     }
     fNEntries+=(long long)previousSize;
   }
@@ -236,6 +257,7 @@ namespace ana
     double entryValsDouble[ NBranches ];
     int entryValsInt[ NBranches ];
     long long entryValsLong[ NBranches ];
+    std::string entryFileName = "";
 
     for ( unsigned int idxBranch=0; idxBranch<fOrderedBranchNames.size(); ++idxBranch ) {
       if ( fOrderedBranchNames.at(idxBranch).find("/i")!=std::string::npos ) {
@@ -275,6 +297,11 @@ namespace ana
       }
     }
 
+    // if fSaveRunSubEvt then add the FileName branch
+    if ( fSaveRunSubEvt ) {
+      theTree.Branch( "FileName", &entryFileName );
+    }
+
     // Loop over entries
     for ( unsigned int idxEntry=0; idxEntry < fNEntries; ++idxEntry ) {
       // Fill up the vals
@@ -284,6 +311,10 @@ namespace ana
         else if ( treatAsLong[idxBranch] && !treatAsInt[idxBranch] ) entryValsLong[idxBranch] = lround(fBranchEntries.at( fOrderedBranchNames.at(idxBranch) ).at(idxEntry));
         else {
           if ( idxEntry==0 ) std::cout << "ERROR!! Branch " << fOrderedBranchNames.at(idxBranch) << " wants to fill as int and long..." << std::endl;
+        }
+        // Add the FileName branch info if fSaveRunSubEvt
+        if ( fSaveRunSubEvt ) {
+          entryFileName = fFileNameEntries.at("FileName").at(idxEntry);
         }
       }
       theTree.Fill();
@@ -337,7 +368,8 @@ namespace ana
   }
 
   //----------------------------------------------------------------------
-  void CovarianceMatrixTree::UpdateEntries( const std::map<std::string, std::vector<double>> valsMap )
+  void CovarianceMatrixTree::UpdateEntries( const std::map<std::string, std::vector<double>> valsMap,
+                                            const std::map<std::string, std::vector<std::string>> namesMap )
   {
     unsigned int idxBranch = 0;
     unsigned int previousSize=0;

@@ -43,7 +43,7 @@ namespace ana
 
     virtual void HandleFile(TFile* f, Progress* prog = 0);
 
-    virtual void HandleRecord(caf::SRSpillProxy* sr);
+    virtual void HandleRecord(caf::SRSpillProxy* sr, const std::string& fName);
 
     /// Save accumulated exposures into the individual spectra
     virtual void StoreExposures();

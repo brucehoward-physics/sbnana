@@ -55,7 +55,8 @@ namespace ana
 
     // Add functionality to update the protected stuff from elsewhere
     /// Function to update protected members (the branches). DO NOT USE outside of the filling.
-    virtual void UpdateEntries ( const std::map<std::string, std::vector<double>> valsMap );
+    virtual void UpdateEntries ( const std::map<std::string, std::vector<double>> valsMap,
+                                 const std::map<std::string, std::vector<std::string>> namesMap );
     /// Function to update protected members (the exposures). DO NOT USE outside of the filling.
     void UpdateExposure ( const double pot, const double livetime );
     // Utilities
@@ -72,6 +73,7 @@ namespace ana
   protected:
     friend class WeightsTree;
     std::map< std::string, std::vector<double>> fBranchEntries;
+    std::map< std::string, std::vector<std::string>> fFileNameEntries;
     std::string fTreeName;
     std::vector<std::string> fOrderedBranchNames;
     long long fNEntries;
@@ -93,7 +95,8 @@ namespace ana
                           SpectrumLoaderBase& loader, const std::vector<SpillMultiVar>& vars, const unsigned int nUniverses,
                           const SpillCut& spillcut );
     /// Function to update protected members (the branches). DO NOT USE outside of the filling.
-    void UpdateEntries ( const std::map<std::string, std::vector<double>> valsMap ) override;
+    void UpdateEntries ( const std::map<std::string, std::vector<double>> valsMap,
+                         const std::map<std::string, std::vector<std::string>> namesMap ) override;
     void SaveToDebug( TDirectory* dir, bool shouldSaveUniverses = true ) const;
     void SaveTo( TDirectory* dir ) const override;
     void PrintBinning() const;
