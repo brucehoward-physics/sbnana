@@ -10,6 +10,8 @@
 #include <iostream>
 #include <utility>
 
+#include <iomanip>
+
 namespace ana
 {
   // Horn Current:
@@ -49,6 +51,36 @@ namespace ana
 
     if ( stringentMode ) return pot > 2.0e12;
     return pot > 0.5e12;
+  }
+
+  // Some weighted averages of beam position monitors
+  //////////////////////////////////////////////////////////////
+  // NOTE: this function does averages THEN projects, I believe NOvA projects then averages. Maybe that's better...
+  std::pair<double,double> BeamPositionMonitors ( const caf::SRNuMIInfoProxy& info )
+  {
+    // If any monitor doesn't have 7 then return -999, -999
+    if ( info.HPTGT.size() != 7 || info.HITGT.size() != 7 ||
+         info.VPTGT.size() != 7 || info.VITGT.size() != 7 ) {
+      std::pair<double,double> ret = std::make_pair<double,double>(-999.,-999.);
+      return ret;
+    }
+
+    double ave_HPTGT(0.), ave_VPTGT(0.), wgt_HPTGT(0.), wgt_VPTGT(0.);
+    for ( unsigned int idxSpillPart=1; idxSpillPart<7; ++idxSpillPart ) {
+      ave_HPTGT+=info.HPTGT[idxSpillPart]*info.HITGT[idxSpillPart];
+      wgt_HPTGT+=info.HITGT[idxSpillPart];
+      ave_VPTGT+=info.VPTGT[idxSpillPart]*info.VITGT[idxSpillPart];
+      wgt_VPTGT+=info.VITGT[idxSpillPart];
+    }
+
+    if ( wgt_HPTGT < std::numeric_limits<double>::epsilon() ||
+         wgt_VPTGT < std::numeric_limits<double>::epsilon() ) {
+      std::pair<double,double> ret = std::make_pair<double,double>(-999.,-999.);
+      return ret;
+    }
+
+    std::pair<double,double> ret = std::make_pair<double,double>( ave_HPTGT/wgt_HPTGT, ave_VPTGT/wgt_VPTGT );
+    return ret;
   }
 
   // Beam Pos at target
@@ -242,6 +274,28 @@ namespace ana
     return pots;
   });
 
+  const SpillMultiVar kBeamHPTGT ( [](const caf::SRSpillProxy *sr)
+  {
+    std::vector<double> posH;
+
+    for ( auto const& spill : sr->hdr.numiinfo ) {
+      posH.push_back( BeamPositionMonitors(spill).first );
+    }
+
+    return posH;
+  });
+
+  const SpillMultiVar kBeamVPTGT ( [](const caf::SRSpillProxy *sr)
+  {
+    std::vector<double> posV;
+
+    for ( auto const& spill : sr->hdr.numiinfo ) {
+      posV.push_back( BeamPositionMonitors(spill).second );
+    }
+
+    return posV;
+  });
+
   const SpillMultiVar kBeamPosHAll ( [](const caf::SRSpillProxy *sr)
   {
     std::vector<double> posH;
@@ -320,6 +374,33 @@ namespace ana
     return BeamWidthVal( sr->hdr.spillnumiinfo ).second;
   });
 
+  // Difference between the Trigger time and Beam Spill time for triggered spills
+  const SpillVar kDeltaBeamTimeDAQTime ( [](const caf::SRSpillProxy *sr) -> double
+  {
+    unsigned long int splTime = (sr->hdr.spillnumiinfo.spill_time_s*1000000000)+sr->hdr.spillnumiinfo.spill_time_ns;
+    unsigned long int trgTime = sr->hdr.triggerinfo.global_trigger_time;
+
+    //std::cout << std::setprecision(19) << splTime << " " << trgTime << std::endl;
+
+    if ( trgTime < splTime ) return -1.*(splTime-trgTime)/1000000000.;
+    return (trgTime-splTime)/1000000000.;
+  });
+
+  const SpillVar kRunNumber ( [](const caf::SRSpillProxy *sr) -> float
+  {
+    return sr->hdr.run;
+  });
+
+  const SpillVar kSubrunNumber ( [](const caf::SRSpillProxy *sr) -> float
+  {
+    return sr->hdr.subrun;
+  });
+
+  const SpillVar kEventNumber ( [](const caf::SRSpillProxy *sr) -> float
+  {
+    return sr->hdr.evt;
+  });
+
   // ---------------------------------------------------------------------------
 
   // Exposure account allowing for quality cuts
@@ -372,6 +453,31 @@ namespace ana
       else                           pot += 0.;
     }
     return pot;
+  });
+
+  // KEEP TRACK OF CUT SPILLS
+  const SpillVar kSummedCuts_NuMI_Cuts ( [](const caf::SRSpillProxy *sr) -> float
+  {
+    float nCut = 0.;
+    for ( auto const& spill : sr->hdr.numiinfo ) {
+      if ( !POTInSpillCut( spill, true ) ) {
+        nCut+=1.;
+        continue;
+      }
+      if ( !HornCurrentCut( spill, true ) ) {
+        nCut+=1.;
+        continue;
+      }
+      if ( !BeamPositionAtTargetCut( spill, sr->hdr.run, false ) ) {
+        nCut+=1.;
+        continue;
+      }
+      if ( !BeamWidthCut( spill ) ) {
+        nCut+=1.;
+        continue;
+      }
+    }
+    return nCut;
   });
 
 }

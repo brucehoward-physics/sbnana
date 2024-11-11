@@ -17,6 +17,8 @@ namespace ana
   double POTInSpillVal ( const caf::SRNuMIInfoProxy& info );
   bool POTInSpillCut ( const caf::SRNuMIInfoProxy& info, const bool stringentMode );
 
+  std::pair<double,double> BeamPositionMonitors( const caf::SRNuMIInfoProxy& info );
+
   double extrapToLoc ( const double var1, const double loc1, const double var2, const double loc2, const double loc3 );
   std::pair<double,double> BeamPositionAtTargetVal( const caf::SRNuMIInfoProxy& info, const unsigned int runNumber );
   bool BeamPositionAtTargetCut ( const caf::SRNuMIInfoProxy& info, const unsigned int runNumber, const bool stringentMode );
@@ -27,6 +29,8 @@ namespace ana
   // For all spills -- only should return info for first event in subrun
   extern const SpillMultiVar kHornCurrentAll;
   extern const SpillMultiVar kPOTInSpillAll;
+  extern const SpillMultiVar kBeamHPTGT;
+  extern const SpillMultiVar kBeamVPTGT;
   extern const SpillMultiVar kBeamPosHAll;
   extern const SpillMultiVar kBeamPosVAll;
   extern const SpillMultiVar kBeamWidthHAll;
@@ -39,10 +43,16 @@ namespace ana
   extern const SpillVar kBeamPosV;
   extern const SpillVar kBeamWidthH;
   extern const SpillVar kBeamWidthV;
+  extern const SpillVar kDeltaBeamTimeDAQTime;
+
+  extern const SpillVar kRunNumber;
+  extern const SpillVar kSubrunNumber;
+  extern const SpillVar kEventNumber;
 
   // Exposure accounting with and without cuts...
   extern const SpillVar kDummyVarForPOTCounting;
   extern const SpillVar kSummedPOT_NuMI_All;
   extern const SpillVar kSummedPOT_NuMI_TRTGTD_All;
   extern const SpillVar kSummedPOT_NuMI_Cuts;
+  extern const SpillVar kSummedCuts_NuMI_Cuts;
 }
