@@ -121,8 +121,8 @@ namespace ana
       wgt_VPTGT+=info.VITGT[idxSpillPart];
     }
 
-    ave_HP121/=7.;
-    ave_VP121/=7.;
+    ave_HP121/=6.;
+    ave_VP121/=6.;
     if ( wgt_HPTGT < std::numeric_limits<double>::epsilon() ||
          wgt_VPTGT < std::numeric_limits<double>::epsilon() ) {
       std::pair<double,double> ret = std::make_pair<double,double>(-999.,-999.);
@@ -181,27 +181,48 @@ namespace ana
     double h_chan[48];
     double v_chan[48];
 
+    // Instead of setting dummy default parameters as we had been,
+    // let's follow an idea from Gray -- previously had set defaults at 0.,1.5,0.,1.
+    double h_sum = 0.;
+    double h_min = 99999.;
+    double v_sum = 0.;
+    double v_min = 99999.;
+
     for ( unsigned int idxX=0; idxX<48; ++idxX ) {
       x_pos[ idxX ] = 0.5 * (idxX+1-24.5);
     }
 
     for ( unsigned int idxH=0; idxH<48; ++idxH ) {
       h_chan[ idxH ] = -1.*info.MTGTDS.at(103+idxH);
+
+      h_sum += h_chan[ idxH ];
+      if ( h_chan[ idxH ] < h_min ){
+	h_min = h_chan[ idxH ];
+      }
     }
 
     for ( unsigned int idxV=0; idxV<48; ++idxV ) {
       v_chan[ idxV ] = -1.*info.MTGTDS.at(151+idxV);
+
+      v_sum += v_chan[ idxV ];
+      if ( v_chan[ idxV ] < v_min ){
+	v_min = v_chan[ idxV ];
+      }
     }
 
     // H width
     TGraph *hGraph = new TGraph(48, x_pos, h_chan);
     TF1 *hGauss = new TF1("hGauss","[0] + [1]*TMath::Exp(-((x-[2])*(x-[2]))/(2*[3]*[3]))");
-    hGauss->SetParameter(0,0.);
-    hGauss->SetParameter(1,1.5);
+    // here we use the quantities above
+    hGauss->SetParameter(0,-1.*h_sum/48.);
+    hGauss->SetParameter(1,-1.*h_min);
     hGauss->SetParameter(2,0.);
-    hGauss->SetParameter(3,1.);
+    hGauss->SetParameter(3,2.);
+    // and like in Jaesung's test, let's force sigma to be positive
+    hGauss->SetParLimits(3,0.,10.);
 
-    // Remove 0s
+    // Remove 0s -- commented out for now to match what Gray used and Jaesung tested
+    /*
     std::vector<int> to_remove_h;
     for ( int idx=0; idx<hGraph->GetN(); ++idx ) {
       double x, y;
@@ -209,18 +230,22 @@ namespace ana
       if ( fabs(y) < std::numeric_limits<double>::epsilon() ) to_remove_h.push_back( idx );
     }
     for ( unsigned int idx=0; idx<to_remove_h.size(); ++idx ) hGraph->RemovePoint( to_remove_h.at( to_remove_h.size()-1-idx ) );
+    */
 
     hGraph->Fit(hGauss,"Q");
 
     // V width
     TGraph *vGraph = new TGraph(48, x_pos, v_chan);
     TF1 *vGauss = new TF1("vGauss","[0] + [1]*TMath::Exp(-((x-[2])*(x-[2]))/(2*[3]*[3]))");
-    vGauss->SetParameter(0,0.);
-    vGauss->SetParameter(1,1.5);
+    // setting parameters like above
+    vGauss->SetParameter(0,-1.*v_sum/48.);
+    vGauss->SetParameter(1,-1.*v_min);
     vGauss->SetParameter(2,0.);
-    vGauss->SetParameter(3,1.);
+    vGauss->SetParameter(3,2.);
+    vGauss->SetParLimits(3,0.,10.);
 
-    // Remove 0s
+    // Remove 0s -- also commented out for now
+    /*
     std::vector<int> to_remove_v;
     for ( int idx=0; idx<vGraph->GetN(); ++idx ) {
       double x, y;
@@ -228,6 +253,7 @@ namespace ana
       if ( fabs(y) < std::numeric_limits<double>::epsilon() ) to_remove_v.push_back( idx );
     }
     for ( unsigned int idx=0; idx<to_remove_v.size(); ++idx ) vGraph->RemovePoint( to_remove_v.at( to_remove_v.size()-1-idx ) );
+    */
 
     vGraph->Fit(vGauss,"Q");
 
