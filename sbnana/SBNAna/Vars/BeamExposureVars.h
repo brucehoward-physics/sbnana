@@ -1,6 +1,7 @@
-// B. Howard - 2023
+// B. Howard - 2023 and 2024, with thanks to others who have worked on this (e.g. G. Putnam, J. Kim)
 //   howard <at> fnal.gov
-// The cuts borrow heavily from NOvA, thanks NOvA!
+// Note that the cuts borrow heavily from NOvA, thanks NOvA!
+//   P. Adamson et al. (NOvA Collaboration). Phys. Rev. D 93 (2016) 051104(R)
 
 #pragma once
 
